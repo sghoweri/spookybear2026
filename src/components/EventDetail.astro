@@ -144,7 +144,7 @@ const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) :
     <footer class="detail-foot">
       <p>
         <strong>Notice something wrong?</strong>
-        <a href={reportUrl} rel="noopener" target="_blank">Let us know</a> and we’ll fix it.
+        <a href={reportUrl} rel="noopener" target="_blank" data-feedback="wrong" data-feedback-event={data.title} data-feedback-slug={event.id}>Let us know</a> and we’ll fix it.
         {data.confidence === 'low' && <span class="sub">Heads up: we found only one thin source for this one, so double-check it.</span>}
       </p>
       {

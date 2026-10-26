@@ -1,6 +1,6 @@
 ---
 import type { EventEntry, VenueEntry } from '../lib/events';
-import { dayIdFor, fmtRange, priceKind, priceLabel, typeLabel } from '../lib/events';
+import { dayIdFor, fmtRange, priceKind, priceLabel, priceShort, typeLabel } from '../lib/events';
 import Paw from './Paw.astro';
 
 interface Props {
@@ -34,8 +34,8 @@ const venueName = venue.data.shortName ?? venue.data.name;
       <span class="row-meta">
         <span class="row-venue">{venueName}</span>
         <span class="badge">{typeLabel(data.type)}</span>
-        <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]}>
-          {priceLabel(event)}
+        <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]} title={priceLabel(event)}>
+          {priceShort(event)}
         </span>
         <span class="badge badge-now" data-now hidden>Now</span>
       </span>
@@ -69,7 +69,7 @@ const venueName = venue.data.shortName ?? venue.data.name;
   }
   .row-main {
     display: grid;
-    grid-template-columns: 5.6rem 1fr;
+    grid-template-columns: 8.75rem minmax(0, 1fr);
     gap: 2px 12px;
     padding: 12px 0 12px 4px;
     color: inherit;
@@ -82,7 +82,8 @@ const venueName = venue.data.shortName ?? venue.data.name;
     color: var(--muted);
     font-size: 0.95rem;
     padding-top: 2px;
-    white-space: nowrap;
+    padding-right: 8px;
+    overflow-wrap: anywhere;
   }
   .row-body {
     min-width: 0;
@@ -165,7 +166,7 @@ const venueName = venue.data.shortName ?? venue.data.name;
   }
   @media (min-width: 720px) {
     .row-main {
-      grid-template-columns: 7rem 1fr;
+      grid-template-columns: 9.5rem minmax(0, 1fr);
       padding-block: 14px;
     }
     .row-title {

@@ -5,14 +5,15 @@ import { SITE } from '../site.config';
 <footer class="site-footer">
   <div class="wrap">
     <p>
-      An unofficial fan-made guide. Not affiliated with
+      An unofficial fan-made guide by Salem Cobalt. Not affiliated with
       <a href={SITE.organizer.url} rel="noopener" target="_blank">{SITE.organizer.name}</a>, who run the official Spooky
       Bear weekend, or with any venue. Times and prices change; always check the venue before you head out.
     </p>
     <p class="links">
       <a href="/about">About this site</a>
       <a href={SITE.repo} rel="noopener" target="_blank">Source on GitHub</a>
-      <a href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank">Report a bug</a>
+      <a href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank" data-feedback="bug">Send feedback</a>
+      <a href="/privacy">Privacy</a>
     </p>
   </div>
 </footer>

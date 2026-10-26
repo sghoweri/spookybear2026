@@ -300,3 +300,7 @@ svg {
 .dialog-loading span:nth-child(3) {
   animation-delay: 0.3s;
 }
+
+body.has-sheet {
+  overflow: hidden;
+}

@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { SITE } from '../site.config';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import FeedbackDialog from '../components/FeedbackDialog.astro';
 
 interface Props {
   title?: string;
@@ -80,6 +81,8 @@ const ga = import.meta.env.PROD ? SITE.gaId : '';
       <slot />
     </main>
     <Footer />
+    <FeedbackDialog />
+    <script src="../scripts/feedback.ts"></script>
   </body>
 </html>
 

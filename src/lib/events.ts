@@ -53,6 +53,21 @@ export function priceLabel(e: EventEntry): string {
   return 'Price TBA';
 }
 
+/** Short price for the glanceable row chip: "Free", "$25", "$22–28", "Ticketed", "Price TBA". */
+export function priceShort(e: EventEntry): string {
+  const kind = priceKind(e);
+  if (kind === 'free') return 'Free';
+  const nums = [...(e.data.price ?? '').matchAll(/\$(\d+(?:\.\d+)?)/g)].map((m) => Math.round(Number(m[1])));
+  if (nums.length) {
+    const lo = Math.min(...nums);
+    const hi = Math.max(...nums);
+    return hi > lo ? `$${lo}–${hi}` : `$${lo}`;
+  }
+  if (/donation/i.test(e.data.price ?? '')) return 'Donation';
+  if (/sold out/i.test(e.data.price ?? '')) return 'Sold out';
+  return kind === 'paid' ? 'Ticketed' : 'Price TBA';
+}
+
 /** "free" | "paid" | "unknown" for the free-vs-ticketed filter. */
 export function priceKind(e: EventEntry): 'free' | 'paid' | 'unknown' {
   const { price, isFree } = e.data;

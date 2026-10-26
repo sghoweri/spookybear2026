@@ -1,9 +1,10 @@
 ---
 import type { EventEntry, VenueEntry } from '../lib/events';
-import { dayIdFor, sortEvents } from '../lib/events';
+import { dayIdFor, priceKind, sortEvents } from '../lib/events';
 import { DAYS, EVENT_TYPES } from '../site.config';
 import EventRow from './EventRow.astro';
 import EventDetail from './EventDetail.astro';
+import FilterMenu from './FilterMenu.astro';
 import Paw from './Paw.astro';
 
 interface Props {
@@ -19,10 +20,23 @@ const sorted = sortEvents(events);
 const byDay = DAYS.map((d) => ({ ...d, events: sorted.filter((e) => e.data.date === d.date) })).filter(
   (d) => d.events.length > 0,
 );
-const usedVenues = venues
-  .filter((v) => events.some((e) => e.data.venue.id === v.id))
-  .sort((a, b) => a.data.name.localeCompare(b.data.name));
-const usedTypes = Object.entries(EVENT_TYPES).filter(([k]) => events.some((e) => e.data.type === k));
+const count = (fn: (e: EventEntry) => boolean) => events.filter(fn).length;
+const areaOptions = (['West End', 'Center', 'East End'] as const)
+  .map((a) => ({ value: `area:${a}`, label: a, count: count((e) => venueById.get(e.data.venue.id)?.data.area === a) }))
+  .filter((o) => o.count > 0);
+const venueOptions = venues
+  .map((v) => ({ value: v.id, label: v.data.shortName ?? v.data.name, count: count((e) => e.data.venue.id === v.id) }))
+  .filter((o) => o.count > 0)
+  .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+const typeOptions = Object.entries(EVENT_TYPES)
+  .map(([value, label]) => ({ value, label, count: count((e) => e.data.type === value) }))
+  .filter((o) => o.count > 0)
+  .sort((a, b) => b.count - a.count);
+const priceOptions = [
+  { value: 'free', label: 'Free', count: count((e) => priceKind(e) === 'free') },
+  { value: 'paid', label: 'Ticketed or cover', count: count((e) => priceKind(e) === 'paid') },
+  { value: 'unknown', label: 'Price not confirmed', count: count((e) => priceKind(e) === 'unknown') },
+].filter((o) => o.count > 0);
 const openEvent = openSlug ? sorted.find((e) => e.id === openSlug) : undefined;
 const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
 ---
@@ -44,44 +58,44 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
           <span class="tab-date">days</span>
         </button>
       </div>
-      <div class="filters">
+
+      <div class="filters" data-filters>
+        <button class="chip chip-icon" type="button" data-search-toggle aria-expanded="false" aria-controls="search-bar" aria-label="Search events">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+        </button>
         <button class="den-toggle" type="button" data-den-toggle aria-pressed="false" aria-controls="den">
           <span class="icon"><Paw /></span>
           <span>My den</span>
           <span class="count" data-den-count>0</span>
         </button>
-        <label class="select">
-          <span class="visually-hidden">Location</span>
-          <select data-filter="venue" aria-label="Filter by location">
-            <option value="">Anywhere</option>
-            <optgroup label="By area">
-              <option value="area:West End">West End</option>
-              <option value="area:Center">Center</option>
-              <option value="area:East End">East End</option>
-            </optgroup>
-            <optgroup label="By venue">
-              {usedVenues.map((v) => <option value={v.id}>{v.data.shortName ?? v.data.name}</option>)}
-            </optgroup>
-          </select>
-        </label>
-        <label class="select">
-          <span class="visually-hidden">Event type</span>
-          <select data-filter="type" aria-label="Filter by event type">
-            <option value="">Any type</option>
-            {usedTypes.map(([k, label]) => <option value={k}>{label}</option>)}
-          </select>
-        </label>
-        <label class="select">
-          <span class="visually-hidden">Price</span>
-          <select data-filter="price" aria-label="Filter by price">
-            <option value="">Any price</option>
-            <option value="free">Free only</option>
-            <option value="paid">Ticketed only</option>
-          </select>
-        </label>
-        <button class="clear" type="button" data-clear hidden>Clear filters</button>
+        <FilterMenu id="venue" label="Location" groups={[{ label: 'Area', options: areaOptions }, { label: 'Venue', options: venueOptions }]} />
+        <FilterMenu id="type" label="Type" groups={[{ options: typeOptions }]} />
+        <FilterMenu id="price" label="Price" groups={[{ options: priceOptions }]} />
+        <FilterMenu id="time" label="Time" groups={[]}>
+          <div class="fm-time" slot="before">
+            <div class="fm-presets">
+              <button type="button" class="preset" data-time-preset="12:00|17:00">Afternoon</button>
+              <button type="button" class="preset" data-time-preset="17:00|21:00">Evening</button>
+              <button type="button" class="preset" data-time-preset="21:00|02:00">Late night</button>
+            </div>
+            <div class="fm-range">
+              <label><span>From</span><input type="time" name="from" step="900" data-time-from /></label>
+              <label><span>To</span><input type="time" name="to" step="900" data-time-to /></label>
+            </div>
+            <p class="fm-hint">Shows anything happening at some point between those times on the selected day.</p>
+          </div>
+        </FilterMenu>
+        <button class="clear" type="button" data-clear hidden>Clear all</button>
       </div>
+
+      <div class="search-bar" id="search-bar" hidden data-search-bar>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+        <input type="search" data-search-input placeholder="Search events, venues, performers…" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search events" enterkeyhint="search" />
+        <button type="button" class="search-cancel" data-search-close>Cancel</button>
+      </div>
+      <p class="search-note" data-search-note hidden>Searching across every day.</p>
     </div>
+    <div class="fm-backdrop" data-menu-backdrop hidden></div>
   </div>
 
   <div class="wrap">
@@ -91,9 +105,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
         <p class="den-sub">Saved on this device only. Nothing leaves your browser.</p>
       </div>
       <ol class="rows" data-den-list></ol>
-      <p class="den-empty" data-den-empty>
-        Nothing saved yet. Tap the paw on anything that looks fun and it’ll show up here.
-      </p>
+      <p class="den-empty" data-den-empty>Nothing saved yet. Tap the paw on anything that looks fun and it’ll show up here.</p>
     </section>
 
     <div class="days" data-days>
@@ -151,9 +163,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     position: sticky;
     top: 0;
     z-index: 20;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg);
     border-bottom: 1px solid var(--line);
     padding: 8px 0 10px;
   }
@@ -197,6 +207,10 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     color: #2a0516;
     opacity: 0.8;
   }
+  .tabs.is-muted .tab[aria-selected='true'] {
+    background: var(--plum-700);
+    color: var(--cream);
+  }
   .filters {
     display: flex;
     gap: 6px;
@@ -214,38 +228,23 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     flex: none;
     width: 24px;
   }
-  .select {
-    position: relative;
+  .filters.has-open {
+    overflow: visible;
+  }
+  .chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex: none;
-  }
-  .select select {
-    appearance: none;
-    -webkit-appearance: none;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--cream);
-    background: var(--raised);
-    border: 1px solid var(--line);
-    border-radius: 999px;
+    width: 40px;
     min-height: 38px;
-    padding: 6px 30px 6px 14px;
-    max-width: 52vw;
-    text-overflow: ellipsis;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--raised);
+    color: var(--cream);
   }
-  .select::after {
-    content: '';
-    position: absolute;
-    right: 13px;
-    top: 50%;
-    width: 7px;
-    height: 7px;
-    border-right: 2px solid var(--faint);
-    border-bottom: 2px solid var(--faint);
-    transform: translateY(-70%) rotate(45deg);
-    pointer-events: none;
-  }
-  .select:has(select:not([value=''])):has(option:checked:not([value=''])) select {
+  .chip-icon:hover,
+  .chip-icon[aria-expanded='true'] {
     border-color: var(--pink);
     color: var(--pink);
   }
@@ -263,6 +262,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     color: var(--cream);
     font-size: 0.9rem;
     font-weight: 600;
+    white-space: nowrap;
   }
   .den-toggle .icon {
     width: 16px;
@@ -300,6 +300,111 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     height: 22px;
   }
 
+  /* Time panel (rendered inside FilterMenu's slot) ------------------------ */
+  .fm-time {
+    padding: 4px 8px 8px;
+  }
+  .fm-presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .preset {
+    min-height: 36px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--plum-900);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--cream);
+  }
+  .preset.is-on {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #2a0516;
+  }
+  .fm-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .fm-range label span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--faint);
+    margin-bottom: 4px;
+  }
+  .fm-range input {
+    width: 100%;
+    font: inherit;
+    color: var(--cream);
+    background: var(--plum-900);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-height: var(--tap);
+    color-scheme: dark;
+  }
+  .fm-hint {
+    margin: 10px 0 0;
+    color: var(--faint);
+    font-size: 0.8rem;
+  }
+  .fm-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgba(8, 2, 14, 0.6);
+  }
+  @media (min-width: 720px) {
+    .fm-backdrop {
+      background: transparent;
+    }
+  }
+
+  /* Search ------------------------------------------------------------- */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 0 6px 0 12px;
+    border: 1px solid var(--pink);
+    border-radius: 999px;
+    background: var(--raised);
+    color: var(--faint);
+  }
+  .search-bar input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--cream);
+    background: transparent;
+    border: 0;
+    min-height: var(--tap);
+    outline: none;
+  }
+  .search-bar input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  .search-cancel {
+    flex: none;
+    color: var(--pink);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0 10px;
+    min-height: 38px;
+  }
+  .search-note {
+    margin: 6px 0 0;
+    color: var(--faint);
+    font-size: 0.85rem;
+  }
+
+  /* Den ------------------------------------------------------------------ */
   .den {
     margin: 20px 0 8px;
     padding: 14px 14px 6px;
@@ -333,13 +438,11 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   .den-empty {
     padding: 8px 0 10px;
   }
-  .den:not(:has([data-den-list] > *)) .den-empty {
-    display: block;
-  }
   .den:has([data-den-list] > *) .den-empty {
     display: none;
   }
 
+  /* Days --------------------------------------------------------------- */
   .day {
     margin-top: 22px;
   }
@@ -369,7 +472,6 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   .rows {
     list-style: none;
     margin: 0;
-    padding: 0;
     background: var(--surface);
     border-radius: var(--radius-lg);
     padding: 4px 10px;
@@ -467,7 +569,6 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
       border-radius: var(--radius-lg);
     }
   }
-  /* No-JS fallback: the dialog is rendered open but non-modal on /event pages. */
   .dialog[open]:not(:modal) {
     background: rgba(8, 2, 14, 0.7);
   }

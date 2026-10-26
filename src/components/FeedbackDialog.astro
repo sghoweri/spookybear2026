@@ -1,0 +1,249 @@
+---
+/**
+ * On-site feedback form. Posts to /api/feedback, which opens a GitHub issue,
+ * so nobody needs a GitHub account. Falls back to a prefilled GitHub link.
+ * Behaviour in src/scripts/feedback.ts.
+ */
+import { SITE } from '../site.config';
+---
+
+<dialog class="fb" id="feedback-dialog" aria-labelledby="fb-title" data-feedback-dialog>
+  <form class="fb-card" method="post" action="/api/feedback" data-feedback-form novalidate>
+    <button class="fb-close" type="button" aria-label="Close" data-fb-close>
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    </button>
+
+    <div data-fb-step="form">
+      <h2 id="fb-title" class="fb-title">Tell us what’s up</h2>
+      <p class="fb-sub">Goes straight to the site’s to-do list. No account needed.</p>
+
+      <div class="fb-kinds" role="radiogroup" aria-label="What kind of feedback?">
+        <label class="fb-kind"><input type="radio" name="kind" value="wrong" checked /><span>Wrong info</span></label>
+        <label class="fb-kind"><input type="radio" name="kind" value="event" /><span>Suggest an event</span></label>
+        <label class="fb-kind"><input type="radio" name="kind" value="bug" /><span>Something’s broken</span></label>
+      </div>
+
+      <label class="fb-field" data-fb-field="event">
+        <span data-fb-event-label>Which event?</span>
+        <input type="text" name="event" maxlength="140" autocomplete="off" placeholder="Event name" />
+        <input type="hidden" name="slug" />
+      </label>
+
+      <label class="fb-field">
+        <span data-fb-message-label>What’s wrong?</span>
+        <textarea name="message" rows="4" required minlength="10" maxlength="4000" placeholder="It actually starts at 5pm, not 4pm."></textarea>
+      </label>
+
+      <label class="fb-field">
+        <span>Link to the correct info <em>(optional)</em></span>
+        <input type="url" name="source" inputmode="url" placeholder="https://instagram.com/p/..." />
+      </label>
+
+      <label class="fb-field">
+        <span>Your email, if you want a reply <em>(optional)</em></span>
+        <input type="email" name="contact" inputmode="email" autocomplete="email" placeholder="you@example.com" />
+      </label>
+
+      <!-- Honeypot: humans never see this. -->
+      <label class="fb-hp" aria-hidden="true"><span>Website</span><input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+      <input type="hidden" name="page" />
+      <input type="hidden" name="opened" />
+
+      <p class="fb-error" data-fb-error role="alert" hidden></p>
+
+      <div class="fb-actions">
+        <button class="btn btn-primary" type="submit" data-fb-submit>Send</button>
+        <a class="btn btn-ghost" href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank" data-fb-github>Use GitHub instead</a>
+      </div>
+      <p class="fb-fine">We keep your message and optional email only to act on your feedback. It becomes a public issue on GitHub (without your email).</p>
+    </div>
+
+    <div data-fb-step="done" hidden>
+      <h2 class="fb-title">Thanks, got it.</h2>
+      <p class="fb-sub" data-fb-done-text>We’ll take a look shortly.</p>
+      <div class="fb-actions">
+        <button class="btn btn-primary" type="button" data-fb-close>Close</button>
+        <a class="btn btn-ghost" href="#" rel="noopener" target="_blank" data-fb-issue-link hidden>See the issue</a>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<style>
+  .fb {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    background: transparent;
+    color: var(--text);
+  }
+  .fb::backdrop {
+    background: rgba(8, 2, 14, 0.7);
+    backdrop-filter: blur(4px);
+  }
+  .fb[open] {
+    display: grid;
+    align-items: end;
+    justify-items: center;
+  }
+  .fb-card {
+    position: relative;
+    width: 100%;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--raised);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: var(--shadow);
+    padding: 22px var(--gutter) calc(22px + env(safe-area-inset-bottom));
+    animation: rise 0.28s var(--ease);
+  }
+  @keyframes rise {
+    from {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+  }
+  .fb-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--muted);
+  }
+  .fb-close:hover {
+    background: var(--plum-700);
+    color: var(--cream);
+  }
+  .fb-title {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+    padding-right: 40px;
+  }
+  .fb-sub {
+    color: var(--faint);
+    margin-bottom: 16px;
+  }
+  .fb-kinds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .fb-kind input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .fb-kind span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--plum-900);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .fb-kind input:checked + span {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #2a0516;
+  }
+  .fb-kind input:focus-visible + span {
+    outline: 3px solid var(--candle);
+    outline-offset: 2px;
+  }
+  .fb-field {
+    display: block;
+    margin-bottom: 14px;
+  }
+  .fb-field > span {
+    display: block;
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-bottom: 6px;
+  }
+  .fb-field em {
+    color: var(--faint);
+    font-weight: 400;
+    font-style: normal;
+  }
+  .fb-field input,
+  .fb-field textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--cream);
+    background: var(--plum-900);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    min-height: var(--tap);
+  }
+  .fb-field textarea {
+    resize: vertical;
+  }
+  .fb-field input:focus,
+  .fb-field textarea:focus {
+    outline: 2px solid var(--pink);
+    outline-offset: 0;
+    border-color: var(--pink);
+  }
+  .fb-field input:user-invalid,
+  .fb-field textarea:user-invalid {
+    border-color: var(--pumpkin);
+  }
+  .fb-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .fb-error {
+    color: var(--candle);
+    background: rgba(255, 209, 102, 0.1);
+    border: 1px solid rgba(255, 209, 102, 0.4);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 0.92rem;
+  }
+  .fb-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .fb-fine {
+    margin: 14px 0 0;
+    color: var(--faint);
+    font-size: 0.8rem;
+  }
+  .btn[aria-busy='true'] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  @media (min-width: 720px) {
+    .fb[open] {
+      align-items: center;
+      padding: 24px;
+    }
+    .fb-card {
+      max-width: 560px;
+      max-height: calc(100dvh - 48px);
+      border-radius: var(--radius-lg);
+      padding: 26px 28px 28px;
+    }
+  }
+</style>

@@ -1,5 +1,6 @@
-/* Client behaviour for the schedule: day tabs, filters, favourites ("my den"),
-   the event dialog with shareable URLs, and the "Now" badge. Vanilla, no deps. */
+/* Client behaviour for the schedule: day tabs, multi-select filters, time window,
+   fuzzy search, favourites ("my den"), the event dialog with shareable URLs, and
+   the "Now" badge. Vanilla TypeScript; fuse.js is loaded only when search opens. */
 
 const TZ = 'America/New_York';
 const DEN_KEY = 'sb26:den';
@@ -12,7 +13,17 @@ const DAY_DATES: Record<string, string> = {
   sun: '2026-11-01',
 };
 
-type Filters = { day: string; venue: string; type: string; price: string; den: boolean };
+type Filters = {
+  day: string;
+  venue: Set<string>;
+  type: Set<string>;
+  price: Set<string>;
+  from: string;
+  to: string;
+  den: boolean;
+  q: string;
+};
+type SearchDoc = { slug: string; title: string; venue: string; venueFull: string; location: string; type: string; organizer: string; tags: string[]; description: string };
 
 const root = document.querySelector<HTMLElement>('[data-schedule]');
 if (root) init(root);
@@ -21,7 +32,7 @@ function init(root: HTMLElement) {
   const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-event]'));
   const groups = Array.from(root.querySelectorAll<HTMLElement>('[data-day-group]'));
   const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-day-tab]'));
-  const selects = Array.from(root.querySelectorAll<HTMLSelectElement>('select[data-filter]'));
+  const tablist = root.querySelector<HTMLElement>('[role="tablist"]')!;
   const denToggle = root.querySelector<HTMLButtonElement>('[data-den-toggle]')!;
   const denCount = root.querySelector<HTMLElement>('[data-den-count]')!;
   const den = root.querySelector<HTMLElement>('[data-den]')!;
@@ -29,9 +40,19 @@ function init(root: HTMLElement) {
   const emptyAll = root.querySelector<HTMLElement>('[data-empty]')!;
   const dialog = root.querySelector<HTMLDialogElement>('[data-dialog]')!;
   const dialogBody = dialog.querySelector<HTMLElement>('[data-dialog-body]')!;
+  const filtersBar = root.querySelector<HTMLElement>('[data-filters]')!;
+  const backdrop = root.querySelector<HTMLElement>('[data-menu-backdrop]')!;
+  const searchToggle = root.querySelector<HTMLButtonElement>('[data-search-toggle]')!;
+  const searchBar = root.querySelector<HTMLElement>('[data-search-bar]')!;
+  const searchInput = root.querySelector<HTMLInputElement>('[data-search-input]')!;
+  const searchNote = root.querySelector<HTMLElement>('[data-search-note]')!;
+  const timeFrom = root.querySelector<HTMLInputElement>('[data-time-from]')!;
+  const timeTo = root.querySelector<HTMLInputElement>('[data-time-to]')!;
   const availableDays = new Set(groups.map((g) => g.dataset.dayGroup!));
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isWide = () => matchMedia('(min-width: 720px)').matches;
 
-  // ---- favourites -------------------------------------------------------
+  // ---- favourites -----------------------------------------------------------
   let saved = new Set<string>(readDen());
 
   function readDen(): string[] {
@@ -50,7 +71,9 @@ function init(root: HTMLElement) {
       /* private mode etc. — favourites just won't persist */
     }
   }
-
+  function titleFor(slug: string): string {
+    return rows.find((r) => r.dataset.slug === slug)?.querySelector('.row-title')?.textContent?.trim() ?? 'this event';
+  }
   function paintSaved(slug?: string) {
     const targets = slug ? [slug] : rows.map((r) => r.dataset.slug!);
     for (const s of targets) {
@@ -67,29 +90,23 @@ function init(root: HTMLElement) {
     denCount.textContent = String(saved.size);
     renderDen();
   }
-
-  function titleFor(slug: string): string {
-    return rows.find((r) => r.dataset.slug === slug)?.querySelector('.row-title')?.textContent?.trim() ?? 'this event';
-  }
-
   function renderDen() {
     denList.replaceChildren();
-    const picks = rows.filter((r) => saved.has(r.dataset.slug!));
-    for (const r of picks) {
+    for (const r of rows.filter((r) => saved.has(r.dataset.slug!))) {
       const clone = r.cloneNode(true) as HTMLElement;
       clone.removeAttribute('data-event');
+      clone.hidden = false;
       clone.dataset.denClone = '';
       denList.append(clone);
     }
     den.hidden = saved.size === 0 && !filters.den;
   }
-
   function toggleSave(slug: string, source?: HTMLElement) {
     if (saved.has(slug)) saved.delete(slug);
     else saved.add(slug);
     writeDen();
     paintSaved(slug);
-    if (source && saved.has(slug)) {
+    if (source && saved.has(slug) && !prefersReducedMotion) {
       source.classList.remove('pop');
       void source.offsetWidth;
       source.classList.add('pop');
@@ -97,65 +114,99 @@ function init(root: HTMLElement) {
     track(saved.has(slug) ? 'save_event' : 'unsave_event', slug);
   }
 
-  // ---- filters ------------------------------------------------------------
-  const filters: Filters = { day: defaultDay(), venue: '', type: '', price: '', den: false };
+  // ---- filters ----------------------------------------------------------------
+  const filters: Filters = readFiltersFromUrl();
 
-  function defaultDay(): string {
-    const fromUrl = new URLSearchParams(location.search).get('day');
-    if (fromUrl && (fromUrl === 'all' || availableDays.has(fromUrl))) return fromUrl;
+  function readFiltersFromUrl(): Filters {
+    const p = new URLSearchParams(location.search);
+    const list = (k: string) => new Set((p.get(k) ?? '').split(',').filter(Boolean));
+    const day = p.get('day');
     const initial = root.dataset.initialDay;
-    if (initial && availableDays.has(initial)) return initial;
     const today = ptownDay();
-    return today && availableDays.has(today) ? today : 'all';
+    return {
+      day: day && (day === 'all' || availableDays.has(day)) ? day : initial && availableDays.has(initial) ? initial : today && availableDays.has(today) ? today : 'all',
+      venue: list('venue'),
+      type: list('type'),
+      price: list('price'),
+      from: validTime(p.get('from')),
+      to: validTime(p.get('to')),
+      den: p.get('den') === '1',
+      q: (p.get('q') ?? '').slice(0, 80),
+    };
+  }
+  function validTime(t: string | null) {
+    return t && /^([01]\d|2[0-3]):[0-5]\d$/.test(t) ? t : '';
   }
 
   /** Which weekend day it is in Provincetown right now; nights belong to the previous day until 5am. */
   function ptownDay(): string | null {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: TZ,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      hour12: false,
-    }).formatToParts(new Date());
-    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
-    let date = `${get('year')}-${get('month')}-${get('day')}`;
-    const hour = Number(get('hour')) % 24;
+    const { date, hour } = nowInPtown();
+    let d = date;
     if (hour < 5) {
-      const d = new Date(`${date}T12:00:00Z`);
-      d.setUTCDate(d.getUTCDate() - 1);
-      date = d.toISOString().slice(0, 10);
+      const x = new Date(`${date}T12:00:00Z`);
+      x.setUTCDate(x.getUTCDate() - 1);
+      d = x.toISOString().slice(0, 10);
     }
-    return DAY_IDS.find((id) => DAY_DATES[id] === date) ?? null;
+    return DAY_IDS.find((id) => DAY_DATES[id] === d) ?? null;
+  }
+  function nowInPtown() {
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+    return { date: `${get('year')}-${get('month')}-${get('day')}`, hour: Number(get('hour')) % 24, minute: Number(get('minute')) };
   }
 
-  function matches(r: HTMLElement): boolean {
-    if (filters.day !== 'all' && r.dataset.day !== filters.day) return false;
-    if (filters.venue) {
-      if (filters.venue.startsWith('area:')) {
-        if (r.dataset.area !== filters.venue.slice(5)) return false;
-      } else if (r.dataset.venue !== filters.venue) return false;
+  /** Minutes since midnight; anything before 5am counts as late the night before. */
+  function toMin(t: string, shiftNight = true) {
+    const [h, m] = t.split(':').map(Number);
+    const v = h * 60 + m;
+    return shiftNight && v < 5 * 60 ? v + 24 * 60 : v;
+  }
+  function timeWindow(): [number, number] | null {
+    if (!filters.from && !filters.to) return null;
+    const f = filters.from ? toMin(filters.from) : 0;
+    let t = filters.to ? toMin(filters.to) : 30 * 60;
+    if (t <= f) t += 24 * 60;
+    return [f, t];
+  }
+
+  let searchHits: Set<string> | null = null;
+
+  function matches(r: HTMLElement, win: [number, number] | null): boolean {
+    const d = r.dataset;
+    if (filters.venue.size) {
+      let ok = false;
+      for (const v of filters.venue) if (v.startsWith('area:') ? d.area === v.slice(5) : d.venue === v) ok = true;
+      if (!ok) return false;
     }
-    if (filters.type && r.dataset.type !== filters.type) return false;
-    if (filters.price && r.dataset.price !== filters.price) return false;
-    if (filters.den && !saved.has(r.dataset.slug!)) return false;
+    if (filters.type.size && !filters.type.has(d.type!)) return false;
+    if (filters.price.size && !filters.price.has(d.price!)) return false;
+    if (filters.den && !saved.has(d.slug!)) return false;
+    if (searchHits && !searchHits.has(d.slug!)) return false;
+    if (win) {
+      if (!d.start) return false;
+      const s = toMin(d.start);
+      let e = d.end ? toMin(d.end) : s + 120;
+      if (e <= s) e += 24 * 60;
+      if (!(s < win[1] && e > win[0])) return false;
+    }
     return true;
   }
 
   function apply() {
+    const win = timeWindow();
+    const searching = Boolean(searchHits);
     let total = 0;
     for (const g of groups) {
       const id = g.dataset.dayGroup!;
-      const dayOn = filters.day === 'all' || filters.day === id;
+      const dayOn = searching || filters.day === 'all' || filters.day === id;
       let shown = 0;
       g.querySelectorAll<HTMLElement>('[data-event]').forEach((r) => {
-        const ok = dayOn && matches(r);
+        const ok = dayOn && matches(r, win);
         r.hidden = !ok;
         if (ok) shown++;
       });
       total += shown;
-      g.hidden = !dayOn;
+      g.hidden = !dayOn || (searching && shown === 0);
       const empty = g.querySelector<HTMLElement>('[data-day-empty]');
       if (empty) empty.hidden = !dayOn || shown > 0;
       const count = g.querySelector<HTMLElement>('[data-day-count]');
@@ -170,28 +221,50 @@ function init(root: HTMLElement) {
       t.setAttribute('aria-selected', String(on));
       t.tabIndex = on ? 0 : -1;
     });
+    tablist.classList.toggle('is-muted', searching);
+    searchNote.hidden = !searching;
     denToggle.setAttribute('aria-pressed', String(filters.den));
     den.hidden = saved.size === 0 && !filters.den;
-    const active = Boolean(filters.venue || filters.type || filters.price || filters.den);
-    root.querySelectorAll<HTMLElement>('.filters [data-clear]').forEach((b) => (b.hidden = !active));
+    const active = Boolean(filters.venue.size || filters.type.size || filters.price.size || filters.den || win || filters.q);
+    filtersBar.querySelectorAll<HTMLElement>('[data-clear]').forEach((b) => (b.hidden = !active));
+    paintMenus();
+    syncUrl();
   }
 
-  function syncDayToUrl() {
+  function syncUrl() {
     if (location.pathname !== '/') return;
-    const url = new URL(location.href);
-    url.searchParams.set('day', filters.day);
-    history.replaceState(history.state, '', url);
+    const p = new URLSearchParams();
+    p.set('day', filters.day);
+    if (filters.venue.size) p.set('venue', [...filters.venue].join(','));
+    if (filters.type.size) p.set('type', [...filters.type].join(','));
+    if (filters.price.size) p.set('price', [...filters.price].join(','));
+    if (filters.from) p.set('from', filters.from);
+    if (filters.to) p.set('to', filters.to);
+    if (filters.den) p.set('den', '1');
+    if (filters.q) p.set('q', filters.q);
+    history.replaceState(history.state, '', `/?${p.toString()}`);
+  }
+
+  function clearAll() {
+    filters.venue.clear();
+    filters.type.clear();
+    filters.price.clear();
+    filters.from = filters.to = '';
+    filters.den = false;
+    root.querySelectorAll<HTMLInputElement>('[data-menu] input[type="checkbox"]').forEach((c) => (c.checked = false));
+    timeFrom.value = timeTo.value = '';
+    setSearch('', { closeBar: true });
   }
 
   tabs.forEach((t) =>
     t.addEventListener('click', () => {
       filters.day = t.dataset.dayTab!;
-      apply();
-      syncDayToUrl();
+      if (searchHits) setSearch('', { closeBar: true });
+      else apply();
       track('select_day', filters.day);
     }),
   );
-  root.querySelector('[role="tablist"]')?.addEventListener('keydown', (e) => {
+  tablist.addEventListener('keydown', (e) => {
     const ke = e as KeyboardEvent;
     if (ke.key !== 'ArrowRight' && ke.key !== 'ArrowLeft') return;
     const i = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
@@ -200,31 +273,223 @@ function init(root: HTMLElement) {
     next.click();
     ke.preventDefault();
   });
-  selects.forEach((s) =>
-    s.addEventListener('change', () => {
-      (filters as Record<string, unknown>)[s.dataset.filter!] = s.value;
-      apply();
-      track('filter', `${s.dataset.filter}:${s.value || 'any'}`);
-    }),
-  );
   denToggle.addEventListener('click', () => {
     filters.den = !filters.den;
     apply();
-    if (filters.den) den.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (filters.den) den.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
   });
   root.addEventListener('click', (e) => {
-    const t = (e.target as HTMLElement).closest<HTMLElement>('[data-clear]');
-    if (!t) return;
-    filters.venue = filters.type = filters.price = '';
-    filters.den = false;
-    selects.forEach((s) => (s.value = ''));
-    apply();
+    if ((e.target as HTMLElement).closest('[data-clear]')) clearAll();
   });
+
+  // ---- menus (multi-select dropdowns) --------------------------------------------
+  const menus = Array.from(root.querySelectorAll<HTMLElement>('[data-menu]'));
+  let openMenu: HTMLElement | null = null;
+
+  function menuParts(m: HTMLElement) {
+    return {
+      id: m.dataset.menu as 'venue' | 'type' | 'price' | 'time',
+      button: m.querySelector<HTMLButtonElement>('[data-menu-button]')!,
+      panel: m.querySelector<HTMLElement>('[data-menu-panel]')!,
+      count: m.querySelector<HTMLElement>('[data-menu-count]')!,
+      label: m.querySelector<HTMLElement>('[data-menu-label]')!,
+    };
+  }
+  function setMenuOpen(m: HTMLElement | null) {
+    if (openMenu && openMenu !== m) {
+      const p = menuParts(openMenu);
+      p.panel.hidden = true;
+      p.button.setAttribute('aria-expanded', 'false');
+    }
+    openMenu = m;
+    if (m) {
+      const p = menuParts(m);
+      p.panel.hidden = false;
+      p.button.setAttribute('aria-expanded', 'true');
+      m.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+      if (isWide()) p.panel.querySelector<HTMLElement>('input, button')?.focus({ preventScroll: true });
+    }
+    backdrop.hidden = !m;
+    filtersBar.classList.toggle('has-open', Boolean(m));
+    document.body.classList.toggle('has-sheet', Boolean(m) && !isWide());
+  }
+  function paintMenus() {
+    for (const m of menus) {
+      const p = menuParts(m);
+      if (p.id === 'time') {
+        const on = Boolean(filters.from || filters.to);
+        p.label.textContent = on ? `${filters.from ? fmt(filters.from) : 'Any'} to ${filters.to ? fmt(filters.to) : 'late'}` : 'Time';
+        p.count.hidden = true;
+        p.button.classList.toggle('is-active', on);
+        m.querySelectorAll<HTMLElement>('[data-time-preset]').forEach((b) => {
+          const [f, t] = b.dataset.timePreset!.split('|');
+          b.classList.toggle('is-on', filters.from === f && filters.to === t);
+        });
+        continue;
+      }
+      const set = filters[p.id];
+      const n = set.size;
+      let text = '';
+      if (n === 1) {
+        const only = m.querySelector<HTMLInputElement>(`input[value="${CSS.escape([...set][0])}"]`);
+        text = only?.parentElement?.querySelector('.fm-text')?.textContent?.trim() ?? '';
+      }
+      p.label.textContent = n === 1 && text ? text : p.id === 'venue' ? 'Location' : p.id === 'type' ? 'Type' : 'Price';
+      p.count.hidden = n < 2;
+      p.count.textContent = String(n);
+      p.button.classList.toggle('is-active', n > 0);
+    }
+  }
+  function fmt(t: string) {
+    const [h, m] = t.split(':').map(Number);
+    const hour = h % 12 === 0 ? 12 : h % 12;
+    return `${hour}${m ? ':' + String(m).padStart(2, '0') : ''}${h >= 12 ? 'pm' : 'am'}`;
+  }
+  for (const m of menus) {
+    const p = menuParts(m);
+    p.button.addEventListener('click', () => setMenuOpen(openMenu === m ? null : m));
+    m.querySelector('[data-menu-done]')?.addEventListener('click', () => setMenuOpen(null));
+    m.querySelector('[data-menu-clear]')?.addEventListener('click', () => {
+      if (p.id === 'time') {
+        filters.from = filters.to = '';
+        timeFrom.value = timeTo.value = '';
+      } else {
+        filters[p.id].clear();
+        m.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((c) => (c.checked = false));
+      }
+      apply();
+    });
+    m.addEventListener('change', (e) => {
+      const input = e.target as HTMLInputElement;
+      if (input.type === 'checkbox') {
+        const set = filters[p.id as 'venue' | 'type' | 'price'];
+        if (input.checked) set.add(input.value);
+        else set.delete(input.value);
+        apply();
+        track('filter', `${p.id}:${input.value}:${input.checked ? 'on' : 'off'}`);
+      } else if (input === timeFrom || input === timeTo) {
+        filters.from = validTime(timeFrom.value);
+        filters.to = validTime(timeTo.value);
+        apply();
+        track('filter', `time:${filters.from || '-'}-${filters.to || '-'}`);
+      }
+    });
+    m.querySelectorAll<HTMLButtonElement>('[data-time-preset]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const [f, t] = b.dataset.timePreset!.split('|');
+        const same = filters.from === f && filters.to === t;
+        filters.from = same ? '' : f;
+        filters.to = same ? '' : t;
+        timeFrom.value = filters.from;
+        timeTo.value = filters.to;
+        apply();
+      }),
+    );
+  }
+  backdrop.addEventListener('click', () => setMenuOpen(null));
+  document.addEventListener('click', (e) => {
+    if (openMenu && !openMenu.contains(e.target as Node) && e.target !== backdrop) setMenuOpen(null);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && openMenu) {
+      const b = menuParts(openMenu).button;
+      setMenuOpen(null);
+      b.focus();
+    }
+  });
+  // Restore checkbox state from the URL.
+  for (const id of ['venue', 'type', 'price'] as const) {
+    for (const v of filters[id]) {
+      const c = root.querySelector<HTMLInputElement>(`[data-menu="${id}"] input[value="${CSS.escape(v)}"]`);
+      if (c) c.checked = true;
+      else filters[id].delete(v);
+    }
+  }
+  timeFrom.value = filters.from;
+  timeTo.value = filters.to;
+
+  // ---- search (fuse.js, loaded on demand) ------------------------------------------
+  type FuseLike = { search: (q: string, o?: { limit?: number }) => { item: SearchDoc }[] };
+  let fuse: Promise<FuseLike> | null = null;
+  let searchSeq = 0;
+
+  function loadSearch(): Promise<FuseLike> {
+    fuse ??= Promise.all([import('fuse.js'), fetch('/search-index.json').then((r) => r.json() as Promise<SearchDoc[]>)]).then(
+      ([mod, docs]) =>
+        new mod.default(docs, {
+          includeScore: true,
+          ignoreLocation: true,
+          threshold: 0.34,
+          minMatchCharLength: 2,
+          keys: [
+            { name: 'title', weight: 3 },
+            { name: 'venue', weight: 2 },
+            { name: 'venueFull', weight: 1.5 },
+            { name: 'location', weight: 1.2 },
+            { name: 'organizer', weight: 1.5 },
+            { name: 'type', weight: 1.2 },
+            { name: 'tags', weight: 1 },
+            { name: 'description', weight: 0.8 },
+          ],
+        }) as unknown as FuseLike,
+    );
+    return fuse;
+  }
+  function openSearch() {
+    setMenuOpen(null);
+    searchBar.hidden = false;
+    searchToggle.setAttribute('aria-expanded', 'true');
+    searchInput.focus();
+    void loadSearch();
+  }
+  function setSearch(q: string, { closeBar = false } = {}) {
+    filters.q = q.trim();
+    searchInput.value = q;
+    if (closeBar) {
+      searchBar.hidden = true;
+      searchToggle.setAttribute('aria-expanded', 'false');
+    }
+    if (filters.q.length < 2) {
+      searchHits = null;
+      apply();
+      return;
+    }
+    const seq = ++searchSeq;
+    loadSearch().then((f) => {
+      if (seq !== searchSeq) return;
+      searchHits = new Set(f.search(filters.q, { limit: 60 }).map((r) => r.item.slug));
+      apply();
+      track('search', filters.q);
+    });
+  }
+  let debounce = 0;
+  searchToggle.addEventListener('click', () => {
+    if (searchBar.hidden) openSearch();
+    else setSearch('', { closeBar: true });
+  });
+  searchToggle.addEventListener('pointerenter', () => void loadSearch(), { once: true });
+  searchInput.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = window.setTimeout(() => setSearch(searchInput.value), 140);
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setSearch('', { closeBar: true });
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchInput.blur();
+    }
+  });
+  root.querySelector('[data-search-close]')?.addEventListener('click', () => setSearch('', { closeBar: true }));
+  if (filters.q) {
+    searchBar.hidden = false;
+    searchToggle.setAttribute('aria-expanded', 'true');
+    searchInput.value = filters.q;
+    setSearch(filters.q);
+  }
 
   // ---- dialog -----------------------------------------------------------
   let pushedOpen = false;
   let lastTrigger: HTMLElement | null = null;
-
   const fragments = new Map<string, Promise<DocumentFragment>>();
 
   function loadFragment(slug: string): Promise<DocumentFragment> {
@@ -247,14 +512,13 @@ function init(root: HTMLElement) {
     }
     return p;
   }
-
   function showDialog() {
+    setMenuOpen(null);
     if (dialog.open && !dialog.matches(':modal')) dialog.close();
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('has-dialog');
     dialog.querySelector<HTMLElement>('.dialog-card')?.scrollTo(0, 0);
   }
-
   let opening = 0;
   function openEvent(slug: string, { push = true, trigger }: { push?: boolean; trigger?: HTMLElement } = {}) {
     if (!rows.some((r) => r.dataset.slug === slug)) return false;
@@ -267,11 +531,10 @@ function init(root: HTMLElement) {
           if (token !== opening) return;
           dialogBody.replaceChildren(frag.cloneNode(true));
           paintSaved(slug);
-          dialog.querySelector<HTMLElement>('#dialog-title')?.focus?.();
         },
         () => {
           if (token !== opening) return;
-          dialogBody.innerHTML = `<div class="dialog-loading"><p>Couldn\u2019t load this event. <a href="/event/${slug}">Open its page instead</a>.</p></div>`;
+          dialogBody.innerHTML = `<div class="dialog-loading"><p>Couldn’t load this event. <a href="/event/${slug}">Open its page instead</a>.</p></div>`;
         },
       );
     }
@@ -286,16 +549,6 @@ function init(root: HTMLElement) {
     track('view_event', slug);
     return true;
   }
-
-  // Warm the fragment on hover / touch so the dialog opens instantly.
-  const warm = (e: Event) => {
-    const a = (e.target as HTMLElement).closest<HTMLElement>('[data-open]');
-    if (a) loadFragment(a.dataset.open!);
-  };
-  root.addEventListener('pointerenter', warm, true);
-  root.addEventListener('touchstart', warm, { capture: true, passive: true });
-  root.addEventListener('focusin', warm);
-
   function closeEvent({ viaHistory = false } = {}) {
     if (dialog.open) dialog.close();
     document.body.classList.remove('has-dialog');
@@ -304,16 +557,21 @@ function init(root: HTMLElement) {
     if (!viaHistory) {
       if (pushedOpen) history.back();
       else {
-        const url = new URL(location.href);
-        url.pathname = '/';
-        url.searchParams.set('day', filters.day);
-        history.replaceState({}, '', url);
+        history.replaceState({}, '', '/');
+        syncUrl();
       }
     }
     pushedOpen = false;
     lastTrigger?.focus();
     lastTrigger = null;
   }
+  const warm = (e: Event) => {
+    const a = (e.target as HTMLElement).closest<HTMLElement>('[data-open]');
+    if (a) loadFragment(a.dataset.open!);
+  };
+  root.addEventListener('pointerenter', warm, true);
+  root.addEventListener('touchstart', warm, { capture: true, passive: true });
+  root.addEventListener('focusin', warm);
 
   root.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
@@ -335,11 +593,9 @@ function init(root: HTMLElement) {
     }
   });
   dialog.addEventListener('close', () => {
-    // Escape key or the close button (form method=dialog) landed here.
     if (document.body.classList.contains('has-dialog')) closeEvent();
   });
   dialog.addEventListener('click', (e) => {
-    // Tap on the backdrop (outside the card) closes.
     if (e.target === dialog) closeEvent();
   });
   window.addEventListener('popstate', () => {
@@ -357,9 +613,8 @@ function init(root: HTMLElement) {
     const label = btn.querySelector<HTMLElement>('[data-share-label]') ?? btn;
     const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
     try {
-      if (nav.share) {
-        await nav.share({ title, text: `${title} at Spooky Bear 2026`, url });
-      } else {
+      if (nav.share) await nav.share({ title, text: `${title} at Spooky Bear 2026`, url });
+      else {
         await navigator.clipboard.writeText(url);
         flash(label, 'Link copied');
       }
@@ -368,7 +623,6 @@ function init(root: HTMLElement) {
       if ((err as Error).name !== 'AbortError') flash(label, 'Copy failed');
     }
   }
-
   function flash(el: HTMLElement, text: string) {
     const prev = el.textContent;
     el.textContent = text;
@@ -377,28 +631,17 @@ function init(root: HTMLElement) {
 
   // ---- "Now" badge ----------------------------------------------------------
   function paintNow() {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: TZ,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).formatToParts(new Date());
-    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
-    const today = `${get('year')}-${get('month')}-${get('day')}`;
-    const nowMin = (Number(get('hour')) % 24) * 60 + Number(get('minute'));
+    const { date: today, hour, minute } = nowInPtown();
+    const nowMin = hour * 60 + minute;
     for (const r of rows) {
       const { date, start, end } = r.dataset;
       const badge = r.querySelector<HTMLElement>('[data-now]');
       if (!badge || !start) continue;
-      let s = toMin(start);
-      let e = end ? toMin(end) : s + 180;
+      const s = toMin(start, false);
+      let e = end ? toMin(end, false) : s + 180;
       if (e <= s) e += 24 * 60;
       let n = nowMin;
       if (date !== today) {
-        // Could be the small hours of the following day.
         const next = new Date(`${date}T12:00:00Z`);
         next.setUTCDate(next.getUTCDate() + 1);
         if (next.toISOString().slice(0, 10) === today) n += 24 * 60;
@@ -407,17 +650,13 @@ function init(root: HTMLElement) {
       badge.hidden = !(n >= s && n < e);
     }
   }
-  function toMin(t: string) {
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m;
-  }
 
   function track(action: string, label: string) {
     const w = window as Window & { dataLayer?: unknown[] };
     (w.dataLayer ??= []).push({ event: action, label });
   }
 
-  // ---- boot -------------------------------------------------------------
+  // ---- boot -------------------------------------------------------------------
   paintSaved();
   apply();
   paintNow();
@@ -425,7 +664,6 @@ function init(root: HTMLElement) {
 
   const m = location.pathname.match(/^\/event\/([^/]+)\/?$/);
   if (m) {
-    // Shared link: the server already rendered the detail; upgrade it to a modal.
     history.replaceState({ sbEvent: m[1] }, '', location.href);
     openEvent(decodeURIComponent(m[1]), { push: false });
   }

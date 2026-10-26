@@ -1,0 +1,251 @@
+---
+/**
+ * A themed multi-select dropdown: a chip button that opens a checklist panel.
+ * On phones the panel is a bottom sheet; on wider screens it's a popover.
+ * Behaviour lives in src/scripts/schedule.ts (open/close, counts, filtering).
+ */
+interface Option {
+  value: string;
+  label: string;
+  count?: number;
+}
+interface Group {
+  label?: string;
+  options: Option[];
+}
+interface Props {
+  id: string;
+  label: string;
+  groups: Group[];
+}
+const { id, label, groups } = Astro.props;
+---
+
+<div class="fm" data-menu={id}>
+  <button class="chip" type="button" aria-expanded="false" aria-controls={`menu-${id}`} data-menu-button>
+    <span data-menu-label>{label}</span>
+    <span class="chip-count" data-menu-count hidden></span>
+    <svg class="chev" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4" /></svg>
+  </button>
+  <div class="fm-panel" id={`menu-${id}`} role="dialog" aria-label={`Filter by ${label.toLowerCase()}`} hidden data-menu-panel>
+    <div class="fm-head">
+      <strong>{label}</strong>
+      <button type="button" class="fm-clear" data-menu-clear>Clear</button>
+    </div>
+    <div class="fm-options">
+      <slot name="before" />
+      {
+        groups.map((g) => (
+          <fieldset class="fm-group">
+            {g.label && <legend>{g.label}</legend>}
+            {g.options.map((o) => (
+              <label class="fm-opt">
+                <input type="checkbox" name={id} value={o.value} />
+                <span class="fm-box" aria-hidden="true" />
+                <span class="fm-text">{o.label}</span>
+                {o.count !== undefined && <span class="fm-n">{o.count}</span>}
+              </label>
+            ))}
+          </fieldset>
+        ))
+      }
+    </div>
+    <div class="fm-foot">
+      <button type="button" class="btn btn-primary" data-menu-done>Done</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fm {
+    position: relative;
+    flex: none;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 6px 12px 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--raised);
+    color: var(--cream);
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .chip:hover,
+  .chip[aria-expanded='true'] {
+    border-color: var(--plum-600);
+    background: var(--plum-700);
+  }
+  .chip.is-active {
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+  .chip-count {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--pink);
+    color: #2a0516;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+  .chev {
+    opacity: 0.7;
+    transition: transform 0.2s var(--ease);
+  }
+  .chip[aria-expanded='true'] .chev {
+    transform: rotate(180deg);
+  }
+
+  .fm-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    max-height: min(72dvh, 560px);
+    display: flex;
+    flex-direction: column;
+    background: var(--raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: var(--shadow);
+    animation: sheet 0.22s var(--ease);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  @keyframes sheet {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+  }
+  .fm-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px 8px;
+    font-size: 1.05rem;
+  }
+  .fm-clear {
+    color: var(--pink);
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-height: var(--tap);
+    padding: 0 8px;
+  }
+  .fm-options {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 10px 8px;
+  }
+  .fm-group {
+    border: 0;
+    margin: 0;
+    padding: 4px 0;
+  }
+  .fm-group + .fm-group {
+    border-top: 1px solid var(--line);
+  }
+  .fm-group legend {
+    padding: 8px 8px 4px;
+    color: var(--faint);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .fm-opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--tap);
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .fm-opt:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .fm-opt input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .fm-box {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--plum-600);
+    display: grid;
+    place-items: center;
+    transition: background-color 0.12s, border-color 0.12s;
+  }
+  .fm-box::after {
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2.5px solid #2a0516;
+    border-bottom: 2.5px solid #2a0516;
+    transform: rotate(-45deg) translate(1px, -1px);
+    opacity: 0;
+  }
+  .fm-opt input:checked ~ .fm-box {
+    background: var(--pink);
+    border-color: var(--pink);
+  }
+  .fm-opt input:checked ~ .fm-box::after {
+    opacity: 1;
+  }
+  .fm-opt input:focus-visible ~ .fm-box {
+    outline: 3px solid var(--candle);
+    outline-offset: 2px;
+  }
+  .fm-text {
+    flex: 1;
+  }
+  .fm-n {
+    color: var(--faint);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .fm-foot {
+    padding: 10px 14px 14px;
+    border-top: 1px solid var(--line);
+  }
+  .fm-foot .btn {
+    width: 100%;
+  }
+  @media (min-width: 720px) {
+    .fm-panel {
+      position: absolute;
+      left: 0;
+      right: auto;
+      bottom: auto;
+      top: calc(100% + 8px);
+      width: 300px;
+      max-height: 60vh;
+      border-radius: var(--radius-lg);
+      padding-bottom: 0;
+      animation: pop-in 0.16s var(--ease);
+    }
+    .fm:last-child .fm-panel,
+    .fm[data-align='right'] .fm-panel {
+      left: auto;
+      right: 0;
+    }
+    .fm-foot {
+      display: none;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      transform: translateY(-6px);
+      opacity: 0;
+    }
+  }
+</style>

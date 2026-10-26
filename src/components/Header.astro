@@ -15,7 +15,7 @@ const isAbout = path.startsWith('/about');
     <nav aria-label="Site">
       <a href="/" aria-current={!isAbout ? 'page' : undefined}>Schedule</a>
       <a href="/about" aria-current={isAbout ? 'page' : undefined}>About</a>
-      <a href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank">Report a bug</a>
+      <a href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank" data-feedback="bug">Feedback</a>
     </nav>
   </div>
 </header>

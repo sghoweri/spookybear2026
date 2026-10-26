@@ -1,20 +1,41 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { SITE } from '../site.config';
+import salem from '../assets/salem.jpg';
 ---
 
 <Base title="About" description="Who made this unofficial Spooky Bear 2026 guide, why it exists, and how to fix something that's wrong.">
   <article class="wrap about">
     <h1>About this site</h1>
-    <div class="prose">
-      <p>
-        <strong>Hi, I’m Salem (he/him).</strong> I’m a principal frontend engineer and former escape room co-owner /
-        technologist with 14+ years of building, and solving, delightful end-user experiences, digital and physical
-        alike. Off the clock I live in Jamaica Plain with my partner and two cats, working through a rotating cast of
-        mad-scientist tech projects: printing parts on a built-from-scratch CoreXY 3D printer, upgrading a
-        wicked-smart apartment, and leveling up my DIY electronics chops. This site is one of those projects.
-      </p>
 
+    <div class="intro">
+      <figure class="photo">
+        <Image src={salem} alt="Salem on the Boatslip deck at sunset in camo shorts and a harness, holding a glowing star wand" width={520} widths={[320, 520, 760]} sizes="(max-width: 720px) 60vw, 260px" loading="eager" />
+        <figcaption>Me, last Spooky Bear, tea dance at the Boatslip.</figcaption>
+      </figure>
+      <div class="prose">
+        <p>
+          <strong>Hi, I’m Salem (he/him).</strong> I’m a frontend engineer and design-systems nerd who has spent 14+
+          years making things for the web that are fast, accessible, and fun to use: component libraries used by
+          thousands of developers, big design-system migrations, and plenty of small sites like this one. Before that
+          I co-owned an escape room company, which is where I picked up the habit of wiring puzzles to
+          microcontrollers and 3D-printing whatever didn’t exist yet.
+        </p>
+        <p>
+          I live in Jamaica Plain with my partner and two cats, where a rotating cast of mad-scientist projects keeps
+          me busy: a built-from-scratch CoreXY 3D printer, a wicked-smart apartment, and now this.
+        </p>
+        <p class="hiring">
+          <strong>Hiring frontend engineers or architects?</strong> I’m currently open to principal-level frontend and
+          design-systems roles. Have a look at <a href="https://salemghoweri.com/" rel="me noopener" target="_blank">salemghoweri.com</a>,
+          poke around <a href="https://github.com/sghoweri" rel="me noopener" target="_blank">my GitHub</a>, or just
+          <a href="mailto:me@salemghoweri.com?subject=Hi%20from%20spookybear2026.com">say hi</a>. I’d love to talk.
+        </p>
+      </div>
+    </div>
+
+    <div class="prose">
       <h2>Why this exists</h2>
       <p>
         Spooky Bear is Ptown’s last big hurrah of the season, and every year the schedule is scattered across a dozen
@@ -32,19 +53,20 @@ import { SITE } from '../site.config';
         <li>Every event is a small text file in a <a href={SITE.repo} rel="noopener" target="_blank">public GitHub repo</a>, with a link back to wherever the details came from.</li>
         <li>Times, prices and lineups change at the last minute in Ptown. When we couldn’t confirm something, the event says so instead of guessing.</li>
         <li>“My den” favourites are stored only in your browser. There are no accounts and nothing is sent anywhere.</li>
-        <li>The site uses Google Analytics for basic, anonymised traffic counts so I know whether anyone found it useful.</li>
+        <li>The site uses the most basic analytics and error monitoring so I know it works. Details on the <a href="/privacy">privacy page</a>.</li>
       </ul>
 
       <h2>Spotted a mistake? Missing an event?</h2>
       <p>
-        Open an issue and I’ll fix it, usually the same day during the weekend. Flyers, Instagram links and screenshots
-        all help.
+        Tell me and I’ll fix it, usually the same day during the weekend. Flyers, Instagram links and screenshots all
+        help. No GitHub account needed.
       </p>
       <p class="cta">
-        <a class="btn btn-primary" href={`${SITE.repo}/issues/new?template=event-correction.yml`} rel="noopener" target="_blank">Report wrong info</a>
-        <a class="btn btn-secondary" href={`${SITE.repo}/issues/new?template=new-event.yml`} rel="noopener" target="_blank">Suggest an event</a>
-        <a class="btn btn-ghost" href={`${SITE.repo}/issues/new?template=bug.yml`} rel="noopener" target="_blank">Something’s broken</a>
+        <button class="btn btn-primary" type="button" data-feedback="wrong">Report wrong info</button>
+        <button class="btn btn-secondary" type="button" data-feedback="event">Suggest an event</button>
+        <button class="btn btn-ghost" type="button" data-feedback="bug">Something’s broken</button>
       </p>
+      <p class="small">Prefer GitHub? <a href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank">Open an issue directly</a>.</p>
     </div>
   </article>
 </Base>
@@ -57,10 +79,48 @@ import { SITE } from '../site.config';
     font-size: clamp(2rem, 7vw, 3rem);
     margin-bottom: 18px;
   }
+  .intro {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 8px;
+  }
+  .photo {
+    margin: 0;
+    max-width: 260px;
+  }
+  .photo :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    transform: rotate(-1.5deg);
+  }
+  .photo figcaption {
+    margin-top: 10px;
+    color: var(--faint);
+    font-size: 0.85rem;
+  }
+  .hiring {
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: rgba(255, 92, 154, 0.1);
+    border: 1px solid rgba(255, 92, 154, 0.35);
+  }
   .cta {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 16px;
+  }
+  .small {
+    color: var(--faint);
+    font-size: 0.9rem;
+  }
+  @media (min-width: 720px) {
+    .intro {
+      grid-template-columns: 260px 1fr;
+      align-items: start;
+      gap: 32px;
+    }
   }
 </style>
