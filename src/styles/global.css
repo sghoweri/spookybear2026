@@ -1,0 +1,278 @@
+/* Spooky Bear 2026 — design tokens and base styles.
+   Palette: night plum backgrounds, candle-cream text, pumpkin for the paw,
+   bear-pink for actions, sea-glass for "free". Headings in Alfa Slab One. */
+
+@font-face {
+  font-family: 'Alfa Slab One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/alfa-slab-one.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Metric-compatible fallback so the slab swapping in doesn't shift layout much. */
+@font-face {
+  font-family: 'Alfa Slab Fallback';
+  src: local('Arial Black'), local('Impact'), local('Helvetica Neue Bold');
+  size-adjust: 92%;
+  ascent-override: 95%;
+  descent-override: 25%;
+}
+
+:root {
+  color-scheme: dark;
+  --plum-950: #15081f;
+  --plum-900: #1f0f2e;
+  --plum-800: #2c1842;
+  --plum-700: #3d2559;
+  --plum-600: #55357a;
+  --cream: #fff1dc;
+  --cream-2: #d9c4cf;
+  --cream-3: #a98fb0;
+  --pumpkin: #ff7a1a;
+  --pumpkin-deep: #c94f00;
+  --pink: #ff5c9a;
+  --pink-deep: #d12d6b;
+  --glass: #4bd6b3;
+  --candle: #ffd166;
+
+  --bg: var(--plum-950);
+  --surface: var(--plum-900);
+  --raised: var(--plum-800);
+  --line: var(--plum-700);
+  --text: var(--cream);
+  --muted: var(--cream-2);
+  --faint: var(--cream-3);
+  --accent: var(--pink);
+  --paw: var(--pumpkin);
+
+  --font-display: 'Alfa Slab One', 'Alfa Slab Fallback', 'Arial Black', Impact, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --radius: 10px;
+  --radius-lg: 18px;
+  --gutter: 16px;
+  --max: 1040px;
+  --tap: 44px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 120px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+body.has-dialog {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0.005em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+a:hover {
+  color: var(--cream);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid var(--candle);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.wrap {
+  width: min(100% - var(--gutter) * 2, var(--max));
+  margin-inline: auto;
+}
+
+/* Buttons ---------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1.2;
+  border: 2px solid transparent;
+  transition: transform 0.15s var(--ease), background-color 0.15s, border-color 0.15s;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: var(--pink);
+  color: #2a0516;
+}
+.btn-primary:hover {
+  background: #ff79ad;
+  color: #2a0516;
+}
+.btn-secondary {
+  background: var(--raised);
+  color: var(--cream);
+  border-color: var(--line);
+}
+.btn-secondary:hover {
+  border-color: var(--plum-600);
+  color: var(--cream);
+}
+.btn-ghost {
+  color: var(--muted);
+  padding-inline: 12px;
+}
+.btn-ghost:hover {
+  color: var(--cream);
+  background: var(--raised);
+}
+
+/* Chips / badges ------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  background: var(--raised);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.badge-free {
+  background: rgba(75, 214, 179, 0.16);
+  color: var(--glass);
+}
+.badge-paid {
+  background: rgba(255, 209, 102, 0.14);
+  color: var(--candle);
+}
+.badge-now {
+  background: var(--pink);
+  color: #2a0516;
+}
+.badge-now::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.badge-saved {
+  background: rgba(255, 122, 26, 0.18);
+  color: var(--pumpkin);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Prose (about page, event descriptions) --------------------------------- */
+.prose {
+  max-width: 64ch;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.prose h2 {
+  font-size: 1.6rem;
+  margin: 2rem 0 0.75rem;
+}
+.prose h3 {
+  font-size: 1.2rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.prose ul {
+  padding-left: 1.2em;
+}
+.prose li + li {
+  margin-top: 0.35em;
+}

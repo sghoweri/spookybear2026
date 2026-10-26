@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="A grinning jack-o-lantern wearing a leather harness">
+  <rect width="800" height="450" fill="#1f0f2e"/>
+  <ellipse cx="400" cy="400" rx="260" ry="30" fill="#15081f"/>
+  <path d="M400 110 q-30 -40 -10 -70 q30 10 20 70z" fill="#4bd6b3"/>
+  <ellipse cx="400" cy="260" rx="190" ry="150" fill="#ff7a1a"/>
+  <ellipse cx="330" cy="260" rx="60" ry="145" fill="#c94f00" opacity="0.35"/>
+  <ellipse cx="470" cy="260" rx="60" ry="145" fill="#c94f00" opacity="0.35"/>
+  <path d="M250 230 l40 -30 l30 50 l-70 10z M550 230 l-40 -30 l-30 50 l70 10z" fill="#15081f"/>
+  <path d="M270 300 q130 90 260 0 q-20 60 -130 70 q-110 -10 -130 -70z" fill="#15081f"/>
+  <path d="M330 320 l20 0 l0 20 l-20 0z M450 320 l20 0 l0 20 l-20 0z" fill="#ff7a1a"/>
+  <path d="M300 180 q100 -40 200 0" stroke="#15081f" stroke-width="18" fill="none" stroke-linecap="round"/>
+  <path d="M400 170 l0 60" stroke="#15081f" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="400" cy="178" r="12" fill="#ffd166"/>
+</svg>

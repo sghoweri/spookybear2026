@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Fog rolling over the harbor at the end of the season">
+  <rect width="800" height="450" fill="#1f0f2e"/>
+  <circle cx="160" cy="120" r="80" fill="#ffd166" opacity="0.9"/>
+  <path d="M0 260 Q100 230 200 260 T400 260 T600 260 T800 260 L800 450 L0 450Z" fill="#2c1842"/>
+  <path d="M0 300 Q120 270 240 300 T480 300 T720 300 T960 300 L960 450 L0 450Z" fill="#3d2559" opacity="0.8"/>
+  <path d="M0 350 Q150 320 300 350 T600 350 T900 350 L900 450 L0 450Z" fill="#55357a" opacity="0.6"/>
+  <g stroke="#ff5c9a" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9">
+    <path d="M520 250 l0 -90"/><path d="M520 160 l60 30 l-60 20z" fill="#ff5c9a"/>
+  </g>
+  <path d="M470 250 q50 20 100 0 l-10 25 q-40 10 -80 0z" fill="#15081f"/>
+  <g fill="#fff1dc" opacity="0.55"><circle cx="390" cy="70" r="2.5"/><circle cx="610" cy="40" r="2"/><circle cx="700" cy="120" r="3"/><circle cx="300" cy="150" r="2"/><circle cx="740" cy="200" r="2"/></g>
+</svg>

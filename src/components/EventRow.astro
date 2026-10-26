@@ -1,0 +1,175 @@
+---
+import type { EventEntry, VenueEntry } from '../lib/events';
+import { dayIdFor, fmtRange, priceKind, priceLabel, typeLabel } from '../lib/events';
+import Paw from './Paw.astro';
+
+interface Props {
+  event: EventEntry;
+  venue: VenueEntry;
+}
+
+const { event, venue } = Astro.props;
+const { data } = event;
+const kind = priceKind(event);
+const venueName = venue.data.shortName ?? venue.data.name;
+---
+
+<li
+  class="row"
+  data-event
+  data-slug={event.id}
+  data-day={dayIdFor(data.date)}
+  data-date={data.date}
+  data-start={data.start ?? ''}
+  data-end={data.end ?? ''}
+  data-venue={venue.id}
+  data-area={venue.data.area}
+  data-type={data.type}
+  data-price={kind}
+>
+  <a class="row-main" href={`/event/${event.id}`} data-open={event.id}>
+    <span class="row-time">{fmtRange(data.start, data.end)}</span>
+    <span class="row-body">
+      <span class="row-title">{data.title}</span>
+      <span class="row-meta">
+        <span class="row-venue">{venueName}</span>
+        <span class="badge">{typeLabel(data.type)}</span>
+        <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]}>
+          {priceLabel(event)}
+        </span>
+        <span class="badge badge-now" data-now hidden>Now</span>
+      </span>
+    </span>
+  </a>
+  <button
+    class="paw"
+    type="button"
+    data-paw={event.id}
+    aria-pressed="false"
+    aria-label={`Save ${data.title} to your den`}
+    title="Save to your den"
+  >
+    <Paw />
+  </button>
+</li>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 1fr var(--tap);
+    align-items: stretch;
+    border-top: 1px solid var(--line);
+    transition: background-color 0.15s;
+  }
+  .row:first-child {
+    border-top: 0;
+  }
+  .row:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+  .row-main {
+    display: grid;
+    grid-template-columns: 5.6rem 1fr;
+    gap: 2px 12px;
+    padding: 12px 0 12px 4px;
+    color: inherit;
+    text-decoration: none;
+    min-height: 60px;
+  }
+  .row-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.95rem;
+    padding-top: 2px;
+    white-space: nowrap;
+  }
+  .row-body {
+    min-width: 0;
+  }
+  .row-title {
+    display: block;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    color: var(--cream);
+  }
+  .row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-top: 4px;
+    color: var(--faint);
+    font-size: 0.9rem;
+  }
+  .row-venue {
+    color: var(--muted);
+  }
+  .paw {
+    display: grid;
+    place-items: center;
+    width: var(--tap);
+    color: var(--faint);
+    opacity: 0.6;
+    transition: color 0.15s, opacity 0.15s, transform 0.2s var(--ease);
+  }
+  .paw :global(svg) {
+    width: 22px;
+    height: 22px;
+  }
+  .paw:hover {
+    opacity: 1;
+    color: var(--cream);
+  }
+  .paw[aria-pressed='true'] {
+    opacity: 1;
+    color: var(--paw);
+  }
+  .paw[aria-pressed='true'] :global(svg) {
+    filter: drop-shadow(0 0 10px rgba(255, 122, 26, 0.55));
+  }
+  .paw.pop :global(svg) {
+    animation: pop 0.35s var(--ease);
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.5) rotate(-15deg);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  :global(.row.is-saved) .row-title::after {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--paw);
+    vertical-align: middle;
+  }
+  @media (max-width: 480px) {
+    .row-main {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .row-time {
+      font-size: 0.85rem;
+      color: var(--pink);
+    }
+  }
+  @media (min-width: 720px) {
+    .row-main {
+      grid-template-columns: 7rem 1fr;
+      padding-block: 14px;
+    }
+    .row-title {
+      font-size: 1.1rem;
+    }
+  }
+</style>

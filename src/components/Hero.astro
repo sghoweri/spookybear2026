@@ -1,0 +1,49 @@
+---
+interface Props {
+  count: number;
+  venues: number;
+}
+const { count, venues } = Astro.props;
+---
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Provincetown, Oct 29 to Nov 1, 2026</p>
+    <h1>Every Spooky Bear party, one furry little schedule.</h1>
+    <p class="lede">
+      {count} events across {venues} venues, pulled together from flyers, venue sites and ticket pages so you can
+      plan the weekend from your phone. Tap the paw to build your own lineup.
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: 18px 0 20px;
+    background:
+      radial-gradient(60% 80% at 100% 0%, rgba(255, 92, 154, 0.22), transparent 70%),
+      radial-gradient(40% 60% at 0% 100%, rgba(255, 122, 26, 0.16), transparent 70%);
+  }
+  .kicker {
+    color: var(--pink);
+    font-weight: 600;
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 6.5vw, 3.4rem);
+    max-width: 18ch;
+    color: var(--cream);
+  }
+  .lede {
+    margin: 12px 0 0;
+    max-width: 56ch;
+    color: var(--muted);
+    font-size: 1.02rem;
+  }
+  @media (min-width: 720px) {
+    .hero {
+      padding: 28px 0 26px;
+    }
+  }
+</style>

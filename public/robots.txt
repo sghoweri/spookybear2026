@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://spookybear2026.com/sitemap-index.xml

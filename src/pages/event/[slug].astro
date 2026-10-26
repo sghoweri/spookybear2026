@@ -1,0 +1,53 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Schedule from '../../components/Schedule.astro';
+import Hero from '../../components/Hero.astro';
+import { fmtRange, isoDateTime, longDate, priceKind } from '../../lib/events';
+import { SITE } from '../../site.config';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events');
+  return events.map((e) => ({ params: { slug: e.id }, props: { event: e } }));
+}
+
+const { event } = Astro.props;
+const events = await getCollection('events');
+const venues = await getCollection('venues');
+const venue = (await getEntry('venues', event.data.venue.id))!;
+const d = event.data;
+
+const description = `${longDate(d.date)}, ${fmtRange(d.start, d.end)} at ${venue.data.name}. ${d.body?.trim().split('\n')[0] ?? ''}`.slice(0, 200);
+const ogImage = d.image ? d.image.src : '/og.png';
+const kind = priceKind(event);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: d.title,
+  startDate: isoDateTime(d.date, d.start) ?? d.date,
+  endDate: isoDateTime(d.date, d.end),
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  eventStatus: 'https://schema.org/EventScheduled',
+  location: {
+    '@type': 'Place',
+    name: d.location ?? venue.data.name,
+    address: { '@type': 'PostalAddress', streetAddress: venue.data.address, addressLocality: 'Provincetown', addressRegion: 'MA', addressCountry: 'US' },
+  },
+  image: new URL(ogImage, SITE.url).href,
+  description,
+  organizer: d.organizer ? { '@type': 'Organization', name: d.organizer } : undefined,
+  offers: d.ticketUrl || kind !== 'unknown'
+    ? { '@type': 'Offer', url: d.ticketUrl ?? d.infoUrl ?? undefined, price: kind === 'free' ? '0' : undefined, priceCurrency: 'USD', availability: 'https://schema.org/InStock' }
+    : undefined,
+  url: `${SITE.url}/event/${event.id}`,
+};
+---
+
+<Base title={d.title} description={description} image={ogImage} ogType="article">
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+  <Hero count={events.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
+  <Schedule events={events} venues={venues} openSlug={event.id} />
+</Base>

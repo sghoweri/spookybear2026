@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Schedule from '../components/Schedule.astro';
+import Hero from '../components/Hero.astro';
+
+const events = await getCollection('events');
+const venues = await getCollection('venues');
+---
+
+<Base>
+  <Hero count={events.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
+  <Schedule events={events} venues={venues} />
+</Base>

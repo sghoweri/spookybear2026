@@ -1,0 +1,293 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import type { EventEntry, VenueEntry } from '../lib/events';
+import { correctionUrl, fmtRange, longDate, placeholderIndex, priceKind, priceLabel, typeLabel } from '../lib/events';
+import { SITE } from '../site.config';
+import Paw from './Paw.astro';
+import paws from '../assets/placeholders/paws.svg';
+import monument from '../assets/placeholders/monument.svg';
+import lantern from '../assets/placeholders/lantern.svg';
+import fog from '../assets/placeholders/fog.svg';
+
+interface Props {
+  event: EventEntry;
+  venue: VenueEntry;
+  /** When true, the heading gets the id the dialog is labelled by. */
+  inDialog?: boolean;
+}
+
+const { event, venue, inDialog = true } = Astro.props;
+const { data } = event;
+const { Content } = await render(event);
+
+const placeholders = [paws, monument, lantern, fog];
+const placeholder = placeholders[placeholderIndex(event.id, placeholders.length)];
+const kind = priceKind(event);
+const where = data.location ?? venue.data.name;
+const shareUrl = `${SITE.url}/event/${event.id}`;
+const reportUrl = correctionUrl(SITE.repo, event, SITE.url);
+const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) : null;
+---
+
+<article class="detail" data-detail-slug={event.id}>
+  <div class="detail-media">
+    {
+      data.image ? (
+        <Image
+          src={data.image}
+          alt={`Promo image for ${data.title}`}
+          widths={[480, 720, 960]}
+          sizes="(max-width: 720px) 100vw, 720px"
+          loading="lazy"
+          decoding="async"
+          class="detail-img"
+        />
+      ) : (
+        <img src={placeholder.src} alt="" width="800" height="450" loading="lazy" decoding="async" class="detail-img detail-img-placeholder" />
+      )
+    }
+    <span class="badge badge-saved detail-saved" data-saved-badge hidden><span class="icon"><Paw /></span> In your den</span>
+  </div>
+
+  <div class="detail-body">
+    <p class="detail-when">
+      <strong>{longDate(data.date)}</strong><span class="dot" aria-hidden="true"> </span>{fmtRange(data.start, data.end)}
+    </p>
+    <h2 id={inDialog ? 'dialog-title' : undefined} class="detail-title">{data.title}</h2>
+    <p class="detail-badges">
+      <span class="badge">{typeLabel(data.type)}</span>
+      <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]}>{priceLabel(event)}</span>
+      {data.ageRestriction && <span class="badge">{data.ageRestriction}</span>}
+      {data.tags.map((t) => <span class="badge">{t}</span>)}
+    </p>
+
+    <div class="detail-actions">
+      {
+        data.ticketUrl && (
+          <a class="btn btn-primary" href={data.ticketUrl} rel="noopener" target="_blank">
+            {kind === 'free' ? 'RSVP' : 'Get tickets'}
+          </a>
+        )
+      }
+      {
+        data.infoUrl && (
+          <a class={`btn ${data.ticketUrl ? 'btn-secondary' : 'btn-primary'}`} href={data.infoUrl} rel="noopener" target="_blank">
+            Event page
+          </a>
+        )
+      }
+      <button class="btn btn-secondary" type="button" data-paw={event.id} aria-pressed="false">
+        <span class="icon"><Paw /></span>
+        <span data-paw-label>Save to my den</span>
+      </button>
+      <button class="btn btn-ghost" type="button" data-share={shareUrl} data-share-title={data.title}>
+        <span data-share-label>Share</span>
+      </button>
+    </div>
+
+    <div class="detail-prose prose">
+      <Content />
+    </div>
+
+    <dl class="detail-facts">
+      <div>
+        <dt>Where</dt>
+        <dd>
+          <strong>{where}</strong>
+          {data.location && <span class="sub">at {venue.data.name}</span>}
+          <span class="sub">{venue.data.address}</span>
+          <a href={venue.data.mapsUrl} rel="noopener" target="_blank">Directions</a>
+          {venue.data.url && (
+            <a href={venue.data.url} rel="noopener" target="_blank">
+              Venue site
+            </a>
+          )}
+        </dd>
+      </div>
+      <div>
+        <dt>When</dt>
+        <dd>
+          <strong>{longDate(data.date)}</strong>
+          <span class="sub">{fmtRange(data.start, data.end)}</span>
+        </dd>
+      </div>
+      <div>
+        <dt>Price</dt>
+        <dd>
+          <strong>{priceLabel(event)}</strong>
+          {kind === 'unknown' && <span class="sub">We couldn’t confirm a price. Check the venue.</span>}
+        </dd>
+      </div>
+      {
+        data.organizer && (
+          <div>
+            <dt>Hosted by</dt>
+            <dd>
+              <strong>{data.organizer}</strong>
+            </dd>
+          </div>
+        )
+      }
+      {
+        data.dressCode && (
+          <div>
+            <dt>Dress code</dt>
+            <dd>
+              <strong>{data.dressCode}</strong>
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    <footer class="detail-foot">
+      <p>
+        <strong>Notice something wrong?</strong>
+        <a href={reportUrl} rel="noopener" target="_blank">Let us know</a> and we’ll fix it.
+        {data.confidence === 'low' && <span class="sub">Heads up: we found only one thin source for this one, so double-check it.</span>}
+      </p>
+      {
+        data.sources.length > 0 && (
+          <p class="sources">
+            Source{data.sources.length > 1 ? 's' : ''}:
+            {data.sources.map((s, i) => (
+              <>
+                <a href={s} rel="noopener nofollow" target="_blank">
+                  {new URL(s).hostname.replace(/^www\./, '')}
+                </a>
+                {i < data.sources.length - 1 ? ', ' : ''}
+              </>
+            ))}
+            {verified && <span class="sub">Last checked {verified.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.</span>}
+          </p>
+        )
+      }
+    </footer>
+  </div>
+</article>
+
+<style>
+  .detail-media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--plum-900);
+    overflow: hidden;
+  }
+  .detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .detail-saved {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    font-size: 0.85rem;
+    padding: 4px 11px;
+    background: rgba(21, 8, 31, 0.85);
+    backdrop-filter: blur(6px);
+  }
+  .icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+  .detail-body {
+    padding: 18px var(--gutter) 24px;
+  }
+  .detail-when {
+    color: var(--pink);
+    font-weight: 600;
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+  }
+  .dot::before {
+    content: '\00b7';
+    margin: 0 6px;
+    color: var(--faint);
+  }
+  .detail-title {
+    font-size: clamp(1.6rem, 5vw, 2.1rem);
+    margin-bottom: 10px;
+  }
+  .detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 16px;
+  }
+  .detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .detail-actions [data-paw][aria-pressed='true'] {
+    color: var(--paw);
+    border-color: rgba(255, 122, 26, 0.5);
+  }
+  .detail-prose {
+    font-size: 1rem;
+    color: var(--muted);
+  }
+  .detail-prose :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .detail-facts {
+    display: grid;
+    gap: 14px;
+    margin: 20px 0 0;
+    padding: 16px;
+    background: var(--plum-900);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+  }
+  .detail-facts > div {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 8px;
+  }
+  .detail-facts dt {
+    color: var(--faint);
+    font-size: 0.9rem;
+    padding-top: 2px;
+  }
+  .detail-facts dd {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+  }
+  .detail-facts dd strong {
+    flex-basis: 100%;
+  }
+  .sub {
+    display: block;
+    flex-basis: 100%;
+    color: var(--faint);
+    font-size: 0.9rem;
+  }
+  .detail-foot {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    color: var(--faint);
+    font-size: 0.9rem;
+  }
+  .detail-foot strong {
+    color: var(--muted);
+  }
+  .sources {
+    margin: 0;
+  }
+  .sources a {
+    color: var(--faint);
+  }
+  @media (min-width: 720px) {
+    .detail-body {
+      padding: 22px 28px 28px;
+    }
+  }
+</style>

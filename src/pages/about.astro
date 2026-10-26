@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+---
+
+<Base title="About" description="Who made this unofficial Spooky Bear 2026 guide, why it exists, and how to fix something that's wrong.">
+  <article class="wrap about">
+    <h1>About this site</h1>
+    <div class="prose">
+      <p>
+        <strong>Hi, I’m Salem (he/him).</strong> I’m a principal frontend engineer and former escape room co-owner /
+        technologist with 14+ years of building, and solving, delightful end-user experiences, digital and physical
+        alike. Off the clock I live in Jamaica Plain with my partner and two cats, working through a rotating cast of
+        mad-scientist tech projects: printing parts on a built-from-scratch CoreXY 3D printer, upgrading a
+        wicked-smart apartment, and leveling up my DIY electronics chops. This site is one of those projects.
+      </p>
+
+      <h2>Why this exists</h2>
+      <p>
+        Spooky Bear is Ptown’s last big hurrah of the season, and every year the schedule is scattered across a dozen
+        venue Instagrams, Facebook events and ticket pages. I wanted one mobile-friendly place to see everything,
+        filter by day or venue, and star the stuff I don’t want to miss.
+      </p>
+      <p>
+        It’s unofficial and run by one fan. It is not affiliated with
+        <a href={SITE.organizer.url} rel="noopener" target="_blank">{SITE.organizer.name}</a>, who run the official
+        Spooky Bear weekend, or with any venue listed here. If you want the official word, go to them.
+      </p>
+
+      <h2>How the data works</h2>
+      <ul>
+        <li>Every event is a small text file in a <a href={SITE.repo} rel="noopener" target="_blank">public GitHub repo</a>, with a link back to wherever the details came from.</li>
+        <li>Times, prices and lineups change at the last minute in Ptown. When we couldn’t confirm something, the event says so instead of guessing.</li>
+        <li>“My den” favourites are stored only in your browser. There are no accounts and nothing is sent anywhere.</li>
+        <li>The site uses Google Analytics for basic, anonymised traffic counts so I know whether anyone found it useful.</li>
+      </ul>
+
+      <h2>Spotted a mistake? Missing an event?</h2>
+      <p>
+        Open an issue and I’ll fix it, usually the same day during the weekend. Flyers, Instagram links and screenshots
+        all help.
+      </p>
+      <p class="cta">
+        <a class="btn btn-primary" href={`${SITE.repo}/issues/new?template=event-correction.yml`} rel="noopener" target="_blank">Report wrong info</a>
+        <a class="btn btn-secondary" href={`${SITE.repo}/issues/new?template=new-event.yml`} rel="noopener" target="_blank">Suggest an event</a>
+        <a class="btn btn-ghost" href={`${SITE.repo}/issues/new?template=bug.yml`} rel="noopener" target="_blank">Something’s broken</a>
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about {
+    padding-top: 24px;
+  }
+  h1 {
+    font-size: clamp(2rem, 7vw, 3rem);
+    margin-bottom: 18px;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+</style>

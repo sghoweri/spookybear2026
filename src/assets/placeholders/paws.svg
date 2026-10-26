@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Paw prints wandering across a plum night sky">
+  <rect width="800" height="450" fill="#1f0f2e"/>
+  <circle cx="650" cy="110" r="70" fill="#ffd166" opacity="0.95"/>
+  <circle cx="625" cy="95" r="62" fill="#1f0f2e" opacity="0.92"/>
+  <g fill="#ff7a1a" opacity="0.9">
+    <g transform="translate(120 320) rotate(-20)"><ellipse rx="34" ry="28"/><circle cx="-34" cy="-34" r="12"/><circle cx="-10" cy="-46" r="12"/><circle cx="14" cy="-46" r="12"/><circle cx="38" cy="-34" r="12"/></g>
+    <g transform="translate(260 240) rotate(-10)"><ellipse rx="34" ry="28"/><circle cx="-34" cy="-34" r="12"/><circle cx="-10" cy="-46" r="12"/><circle cx="14" cy="-46" r="12"/><circle cx="38" cy="-34" r="12"/></g>
+    <g transform="translate(400 300) rotate(0)"><ellipse rx="34" ry="28"/><circle cx="-34" cy="-34" r="12"/><circle cx="-10" cy="-46" r="12"/><circle cx="14" cy="-46" r="12"/><circle cx="38" cy="-34" r="12"/></g>
+    <g transform="translate(540 230) rotate(12)"><ellipse rx="34" ry="28"/><circle cx="-34" cy="-34" r="12"/><circle cx="-10" cy="-46" r="12"/><circle cx="14" cy="-46" r="12"/><circle cx="38" cy="-34" r="12"/></g>
+  </g>
+  <g fill="#fff1dc" opacity="0.5"><circle cx="90" cy="70" r="2.5"/><circle cx="210" cy="40" r="2"/><circle cx="330" cy="90" r="3"/><circle cx="470" cy="50" r="2"/><circle cx="760" cy="200" r="2.5"/><circle cx="40" cy="190" r="2"/></g>
+</svg>

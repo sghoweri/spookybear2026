@@ -1,0 +1,39 @@
+---
+import { SITE } from '../site.config';
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>
+      An unofficial fan-made guide. Not affiliated with
+      <a href={SITE.organizer.url} rel="noopener" target="_blank">{SITE.organizer.name}</a>, who run the official Spooky
+      Bear weekend, or with any venue. Times and prices change; always check the venue before you head out.
+    </p>
+    <p class="links">
+      <a href="/about">About this site</a>
+      <a href={SITE.repo} rel="noopener" target="_blank">Source on GitHub</a>
+      <a href={`${SITE.repo}/issues/new/choose`} rel="noopener" target="_blank">Report a bug</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding: 28px 0 calc(28px + env(safe-area-inset-bottom));
+    color: var(--faint);
+    font-size: 0.9rem;
+  }
+  .site-footer p {
+    max-width: 70ch;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 0;
+  }
+  .site-footer a {
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Not found" noindex>
+  <section class="wrap lost">
+    <h1>That page wandered off into the fog.</h1>
+    <p>The event may have been renamed or removed. The full schedule is still right here.</p>
+    <a class="btn btn-primary" href="/">Back to the schedule</a>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    padding: 48px 0;
+    max-width: 40ch;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    margin-bottom: 12px;
+  }
+  p {
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+</style>

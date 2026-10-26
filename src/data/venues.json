@@ -1,0 +1,98 @@
+[
+  {
+    "id": "boatslip",
+    "name": "Boatslip Resort & Beach Club",
+    "shortName": "Boatslip",
+    "address": "161 Commercial St, Provincetown, MA 02657",
+    "area": "West End",
+    "url": "https://www.boatslipresort.com/",
+    "instagram": "boatslipresort",
+    "mapsUrl": "https://maps.google.com/?q=Boatslip+Resort+161+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "Home of Tea Dance. Spooky Bear's official tea dances and marketplace happen here."
+  },
+  {
+    "id": "crown-anchor",
+    "name": "Crown & Anchor",
+    "shortName": "Crown & Anchor",
+    "address": "247 Commercial St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://onlyatthecrown.com/",
+    "instagram": "crownandanchorptown",
+    "mapsUrl": "https://maps.google.com/?q=Crown+%26+Anchor+247+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "Multiple rooms: Paramount (dance floor), Wave Bar, Vault, Cabaret, Central House."
+  },
+  {
+    "id": "gifford-house",
+    "name": "Gifford House",
+    "shortName": "Gifford House",
+    "address": "9-11 Carver St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://www.giffordhouse.com/",
+    "instagram": "giffordhouse",
+    "mapsUrl": "https://maps.google.com/?q=Gifford+House+9+Carver+St+Provincetown+MA",
+    "hours": null,
+    "notes": "The Porch Bar upstairs, Club Purgatory downstairs."
+  },
+  {
+    "id": "a-house",
+    "name": "Atlantic House (A-House)",
+    "shortName": "A-House",
+    "address": "4-6 Masonic Pl, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://ahouse.com/",
+    "instagram": "ahouseptown",
+    "mapsUrl": "https://maps.google.com/?q=Atlantic+House+4+Masonic+Pl+Provincetown+MA",
+    "hours": null,
+    "notes": "Little Bar, Macho Bar and the Big Room dance floor."
+  },
+  {
+    "id": "red-room",
+    "name": "The Red Room",
+    "shortName": "Red Room",
+    "address": "258 Commercial St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": null,
+    "instagram": "redroomptown",
+    "mapsUrl": "https://maps.google.com/?q=Red+Room+258+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": null
+  },
+  {
+    "id": "provincetown-inn",
+    "name": "Provincetown Inn",
+    "shortName": "Provincetown Inn",
+    "address": "1 Commercial St, Provincetown, MA 02657",
+    "area": "West End",
+    "url": "https://www.provincetowninn.com/",
+    "instagram": "provincetowninn",
+    "mapsUrl": "https://maps.google.com/?q=Provincetown+Inn+1+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "The Keyhole bar is inside the inn, at the far west end of town."
+  },
+  {
+    "id": "pilgrim-house",
+    "name": "Pilgrim House",
+    "shortName": "Pilgrim House",
+    "address": "336 Commercial St, Provincetown, MA 02657",
+    "area": "East End",
+    "url": "https://www.pilgrimhouseptown.com/",
+    "instagram": "pilgrimhouseptown",
+    "mapsUrl": "https://maps.google.com/?q=Pilgrim+House+336+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": null
+  },
+  {
+    "id": "post-office-cabaret",
+    "name": "Post Office Cabaret",
+    "shortName": "Post Office Cabaret",
+    "address": "303 Commercial St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://www.postofficecabaret.com/",
+    "instagram": "postofficecabaret",
+    "mapsUrl": "https://maps.google.com/?q=Post+Office+Cabaret+303+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": null
+  }
+]
