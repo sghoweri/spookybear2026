@@ -45,10 +45,15 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
         </button>
       </div>
       <div class="filters">
+        <button class="den-toggle" type="button" data-den-toggle aria-pressed="false" aria-controls="den">
+          <span class="icon"><Paw /></span>
+          <span>My den</span>
+          <span class="count" data-den-count>0</span>
+        </button>
         <label class="select">
           <span class="visually-hidden">Location</span>
           <select data-filter="venue" aria-label="Filter by location">
-            <option value="">Anywhere in Ptown</option>
+            <option value="">Anywhere</option>
             <optgroup label="By area">
               <option value="area:West End">West End</option>
               <option value="area:Center">Center</option>
@@ -62,23 +67,18 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
         <label class="select">
           <span class="visually-hidden">Event type</span>
           <select data-filter="type" aria-label="Filter by event type">
-            <option value="">Any kind of event</option>
+            <option value="">Any type</option>
             {usedTypes.map(([k, label]) => <option value={k}>{label}</option>)}
           </select>
         </label>
         <label class="select">
           <span class="visually-hidden">Price</span>
           <select data-filter="price" aria-label="Filter by price">
-            <option value="">Free or ticketed</option>
+            <option value="">Any price</option>
             <option value="free">Free only</option>
             <option value="paid">Ticketed only</option>
           </select>
         </label>
-        <button class="den-toggle" type="button" data-den-toggle aria-pressed="false" aria-controls="den">
-          <span class="icon"><Paw /></span>
-          <span>My den</span>
-          <span class="count" data-den-count>0</span>
-        </button>
         <button class="clear" type="button" data-clear hidden>Clear filters</button>
       </div>
     </div>
@@ -208,6 +208,11 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   }
   .filters::-webkit-scrollbar {
     display: none;
+  }
+  .filters::after {
+    content: '';
+    flex: none;
+    width: 24px;
   }
   .select {
     position: relative;
