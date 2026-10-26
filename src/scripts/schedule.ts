@@ -173,7 +173,7 @@ function init(root: HTMLElement) {
     denToggle.setAttribute('aria-pressed', String(filters.den));
     den.hidden = saved.size === 0 && !filters.den;
     const active = Boolean(filters.venue || filters.type || filters.price || filters.den);
-    root.querySelectorAll<HTMLElement>('[data-clear]').forEach((b) => (b.hidden = !active));
+    root.querySelectorAll<HTMLElement>('.filters [data-clear]').forEach((b) => (b.hidden = !active));
   }
 
   function syncDayToUrl() {
@@ -225,15 +225,58 @@ function init(root: HTMLElement) {
   let pushedOpen = false;
   let lastTrigger: HTMLElement | null = null;
 
-  function openEvent(slug: string, { push = true, trigger }: { push?: boolean; trigger?: HTMLElement } = {}) {
-    const tpl = root.querySelector<HTMLTemplateElement>(`template[data-detail="${slug}"]`);
-    if (!tpl) return false;
-    dialogBody.replaceChildren(tpl.content.cloneNode(true));
-    paintSaved(slug);
+  const fragments = new Map<string, Promise<DocumentFragment>>();
+
+  function loadFragment(slug: string): Promise<DocumentFragment> {
+    let p = fragments.get(slug);
+    if (!p) {
+      p = fetch(`/fragments/${encodeURIComponent(slug)}`, { headers: { accept: 'text/html' } })
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.text();
+        })
+        .then((html) => {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          doc.querySelectorAll('link, style, script').forEach((n) => n.remove());
+          const frag = document.createDocumentFragment();
+          frag.append(...Array.from(doc.body.childNodes));
+          return frag;
+        });
+      p.catch(() => fragments.delete(slug));
+      fragments.set(slug, p);
+    }
+    return p;
+  }
+
+  function showDialog() {
     if (dialog.open && !dialog.matches(':modal')) dialog.close();
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('has-dialog');
     dialog.querySelector<HTMLElement>('.dialog-card')?.scrollTo(0, 0);
+  }
+
+  let opening = 0;
+  function openEvent(slug: string, { push = true, trigger }: { push?: boolean; trigger?: HTMLElement } = {}) {
+    if (!rows.some((r) => r.dataset.slug === slug)) return false;
+    const token = ++opening;
+    const prerendered = dialogBody.querySelector(`[data-detail-slug="${slug}"]`);
+    if (!prerendered) {
+      dialogBody.innerHTML = '<div class="dialog-loading" aria-busy="true"><span></span><span></span><span></span></div>';
+      loadFragment(slug).then(
+        (frag) => {
+          if (token !== opening) return;
+          dialogBody.replaceChildren(frag.cloneNode(true));
+          paintSaved(slug);
+          dialog.querySelector<HTMLElement>('#dialog-title')?.focus?.();
+        },
+        () => {
+          if (token !== opening) return;
+          dialogBody.innerHTML = `<div class="dialog-loading"><p>Couldn\u2019t load this event. <a href="/event/${slug}">Open its page instead</a>.</p></div>`;
+        },
+      );
+    }
+    showDialog();
+    paintSaved(slug);
     lastTrigger = trigger ?? null;
     if (push) {
       history.pushState({ sbEvent: slug }, '', `/event/${slug}`);
@@ -243,6 +286,15 @@ function init(root: HTMLElement) {
     track('view_event', slug);
     return true;
   }
+
+  // Warm the fragment on hover / touch so the dialog opens instantly.
+  const warm = (e: Event) => {
+    const a = (e.target as HTMLElement).closest<HTMLElement>('[data-open]');
+    if (a) loadFragment(a.dataset.open!);
+  };
+  root.addEventListener('pointerenter', warm, true);
+  root.addEventListener('touchstart', warm, { capture: true, passive: true });
+  root.addEventListener('focusin', warm);
 
   function closeEvent({ viaHistory = false } = {}) {
     if (dialog.open) dialog.close();

@@ -128,17 +128,6 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     </div>
   </div>
 
-  {
-    sorted.map((e) => {
-      const venue = venueById.get(e.data.venue.id)!;
-      return (
-        <template data-detail={e.id}>
-          <EventDetail event={e} venue={venue} />
-        </template>
-      );
-    })
-  }
-
   <dialog class="dialog" id="event-dialog" aria-labelledby="dialog-title" data-dialog open={openEvent ? true : undefined}>
     <div class="dialog-card">
       <form method="dialog" class="dialog-bar">

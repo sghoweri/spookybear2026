@@ -13,7 +13,7 @@ export default defineConfig({
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   integrations: [
     partytown({ config: { forward: ['dataLayer.push'] } }),
-    sitemap(),
+    sitemap({ filter: (page) => !page.includes('/fragments/') }),
   ],
   image: {
     // Remote promo images are downloaded by scripts/fetch-images.mjs into

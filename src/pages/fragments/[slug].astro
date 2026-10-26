@@ -1,0 +1,18 @@
+---
+/**
+ * Bare HTML fragment for one event's detail panel. The schedule page fetches
+ * this when a row is tapped instead of shipping all 77 details in the first paint.
+ */
+import { getCollection, getEntry } from 'astro:content';
+import EventDetail from '../../components/EventDetail.astro';
+
+export async function getStaticPaths() {
+  const events = await getCollection('events');
+  return events.map((e) => ({ params: { slug: e.id }, props: { event: e } }));
+}
+
+const { event } = Astro.props;
+const venue = (await getEntry('venues', event.data.venue.id))!;
+---
+
+<EventDetail event={event} venue={venue} />
