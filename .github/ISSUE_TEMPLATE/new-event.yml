@@ -1,0 +1,34 @@
+name: Suggest an event
+description: We're missing a Spooky Bear weekend event
+title: "New event: "
+labels: [new-event]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Event name
+    validations:
+      required: true
+  - type: input
+    id: venue
+    attributes:
+      label: Venue
+    validations:
+      required: true
+  - type: input
+    id: when
+    attributes:
+      label: Day and time
+      placeholder: Friday Oct 30, 10pm to 1am
+    validations:
+      required: true
+  - type: input
+    id: price
+    attributes:
+      label: Price
+      placeholder: Free / $20 / unknown
+  - type: textarea
+    id: details
+    attributes:
+      label: Details and links
+      description: Ticket link, flyer, Instagram post, description.

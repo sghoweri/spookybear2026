@@ -5,11 +5,11 @@
     "shortName": "Boatslip",
     "address": "161 Commercial St, Provincetown, MA 02657",
     "area": "West End",
-    "url": "https://www.boatslipresort.com/",
+    "url": "https://theboatslip.com/",
     "instagram": "boatslipresort",
     "mapsUrl": "https://maps.google.com/?q=Boatslip+Resort+161+Commercial+St+Provincetown+MA",
-    "hours": null,
-    "notes": "Home of Tea Dance. Spooky Bear's official tea dances and marketplace happen here."
+    "hours": "Tea Dance from 4pm.",
+    "notes": "Home of Tea Dance. Spooky Bear's official teas and the marketplace happen here."
   },
   {
     "id": "crown-anchor",
@@ -21,19 +21,19 @@
     "instagram": "crownandanchorptown",
     "mapsUrl": "https://maps.google.com/?q=Crown+%26+Anchor+247+Commercial+St+Provincetown+MA",
     "hours": null,
-    "notes": "Multiple rooms: Paramount (dance floor), Wave Bar, Vault, Cabaret, Central House."
+    "notes": "Many rooms: Paramount (dance floor), Wave Bar, the Vault (leather bar), Cabaret, and the Restaurant & Courtyard, where shows are free."
   },
   {
     "id": "gifford-house",
     "name": "Gifford House",
     "shortName": "Gifford House",
-    "address": "9-11 Carver St, Provincetown, MA 02657",
+    "address": "9 Carver St, Provincetown, MA 02657",
     "area": "Center",
-    "url": "https://www.giffordhouse.com/",
+    "url": "https://gifford.house/",
     "instagram": "giffordhouse",
     "mapsUrl": "https://maps.google.com/?q=Gifford+House+9+Carver+St+Provincetown+MA",
-    "hours": null,
-    "notes": "The Porch Bar upstairs, Club Purgatory downstairs."
+    "hours": "Porch Bar 5pm to 1am. Club Purgatory most nights 9pm to 1am.",
+    "notes": "The Porch Bar is upstairs; Club Purgatory is the basement club. Everything closes at 1am."
   },
   {
     "id": "a-house",
@@ -53,11 +53,11 @@
     "shortName": "Red Room",
     "address": "258 Commercial St, Provincetown, MA 02657",
     "area": "Center",
-    "url": null,
+    "url": "https://redroom.club/",
     "instagram": "redroomptown",
     "mapsUrl": "https://maps.google.com/?q=Red+Room+258+Commercial+St+Provincetown+MA",
     "hours": null,
-    "notes": null
+    "notes": "Tickets through redroom.club. Shows often sell out."
   },
   {
     "id": "provincetown-inn",
@@ -69,7 +69,7 @@
     "instagram": "provincetowninn",
     "mapsUrl": "https://maps.google.com/?q=Provincetown+Inn+1+Commercial+St+Provincetown+MA",
     "hours": null,
-    "notes": "The Keyhole bar is inside the inn, at the far west end of town."
+    "notes": "The Keyhole is the speakeasy-style bar inside; the Mayflower Room hosts brunch. Far west end, a 15 minute walk from the center."
   },
   {
     "id": "pilgrim-house",
@@ -80,19 +80,103 @@
     "url": "https://www.pilgrimhouseptown.com/",
     "instagram": "pilgrimhouseptown",
     "mapsUrl": "https://maps.google.com/?q=Pilgrim+House+336+Commercial+St+Provincetown+MA",
-    "hours": null,
+    "hours": "Piano bar from 6pm Thu to Sat.",
     "notes": null
   },
   {
     "id": "post-office-cabaret",
-    "name": "Post Office Cabaret",
-    "shortName": "Post Office Cabaret",
+    "name": "Post Office Cafe & Cabaret",
+    "shortName": "Post Office",
     "address": "303 Commercial St, Provincetown, MA 02657",
     "area": "Center",
-    "url": "https://www.postofficecabaret.com/",
+    "url": "https://postofficecafe.net/",
     "instagram": "postofficecabaret",
     "mapsUrl": "https://maps.google.com/?q=Post+Office+Cabaret+303+Commercial+St+Provincetown+MA",
-    "hours": null,
+    "hours": "Breakfast 8:30 to 11:30am, weekend brunch to 2pm, pub menu noon to 9pm.",
+    "notes": "Cabaret upstairs, cafe and bar downstairs."
+  },
+  {
+    "id": "governor-bradford",
+    "name": "Governor Bradford",
+    "shortName": "Governor Bradford",
+    "address": "312 Commercial St, Provincetown, MA 02657",
+    "area": "East End",
+    "url": "https://thegovernorbradford.com/",
+    "instagram": "thegovernorbradford",
+    "mapsUrl": "https://maps.google.com/?q=Governor+Bradford+312+Commercial+St+Provincetown+MA",
+    "hours": "Noon to 12:30am, closed Tuesdays. Happy hour 4 to 6pm.",
+    "notes": "Drag karaoke most nights."
+  },
+  {
+    "id": "tin-pan-alley",
+    "name": "Tin Pan Alley",
+    "shortName": "Tin Pan Alley",
+    "address": "269 Commercial St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://www.tinpanalleyptown.com/",
+    "instagram": "tinpanalleyptown",
+    "mapsUrl": "https://maps.google.com/?q=Tin+Pan+Alley+269+Commercial+St+Provincetown+MA",
+    "hours": "Bar 11:30am to 11:30pm. Live piano nightly.",
     "notes": null
+  },
+  {
+    "id": "town-hall",
+    "name": "Provincetown Town Hall",
+    "shortName": "Town Hall",
+    "address": "260 Commercial St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://www.provincetown-ma.gov/",
+    "instagram": null,
+    "mapsUrl": "https://maps.google.com/?q=Provincetown+Town+Hall+260+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "The farmers' market sets up on Ryder St beside Town Hall."
+  },
+  {
+    "id": "shipwreck-lounge",
+    "name": "Shipwreck Lounge",
+    "shortName": "Shipwreck Lounge",
+    "address": "67 Bradford St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://www.brasskey.com/shipwreck-lounge",
+    "instagram": "shipwrecklounge",
+    "mapsUrl": "https://maps.google.com/?q=Shipwreck+Lounge+67+Bradford+St+Provincetown+MA",
+    "hours": "5pm to 1am daily.",
+    "notes": "Cocktail lounge at the Brass Key. No special events listed, but open all weekend."
+  },
+  {
+    "id": "harbor-lounge",
+    "name": "Harbor Lounge",
+    "shortName": "Harbor Lounge",
+    "address": "359 Commercial St, Provincetown, MA 02657",
+    "area": "East End",
+    "url": null,
+    "instagram": "harborloungeptown",
+    "mapsUrl": "https://maps.google.com/?q=Harbor+Lounge+359+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "Waterfront cocktail bar."
+  },
+  {
+    "id": "arts-dune-tours",
+    "name": "Art's Dune Tours",
+    "shortName": "Art's Dune Tours",
+    "address": "4 Standish St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://www.artsdunetours.com/",
+    "instagram": "artsdunetours",
+    "mapsUrl": "https://maps.google.com/?q=Art%27s+Dune+Tours+4+Standish+St+Provincetown+MA",
+    "hours": null,
+    "notes": "Tours leave from the office at Standish and Commercial. Call 508-487-1950 to book."
+  },
+  {
+    "id": "sanctum-paranormal",
+    "name": "Sanctum Paranormal Ghost Tours",
+    "shortName": "Sanctum Ghost Tour",
+    "address": "Meets at 322 Commercial St, Provincetown, MA 02657",
+    "area": "East End",
+    "url": "https://www.sanctumparanormal.com/",
+    "instagram": "sanctumparanormal",
+    "mapsUrl": "https://maps.google.com/?q=322+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "Walking ghost tour; meet outside 322 Commercial St."
   }
 ]

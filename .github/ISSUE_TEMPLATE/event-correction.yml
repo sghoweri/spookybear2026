@@ -1,0 +1,25 @@
+name: Event correction
+description: Something about an event is wrong (time, price, venue, cancelled, etc.)
+title: "Event correction: "
+labels: [event-correction]
+body:
+  - type: input
+    id: event
+    attributes:
+      label: Which event?
+      description: Paste the event link from spookybear2026.com if you have it.
+      placeholder: https://spookybear2026.com/event/solid-gold-tea
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What's wrong?
+      placeholder: It actually starts at 5pm, not 4pm. / It's $20 at the door. / It moved to the A-House.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where did you see the correct info?
+      description: A link, a flyer photo, an Instagram post. Anything helps us verify.

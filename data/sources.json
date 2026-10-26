@@ -1,0 +1,20 @@
+[
+  { "id": "ursamen-spookybear", "venue": "Northeast Ursamen (official)", "url": "https://www.ursamen.org/spookybear" },
+  { "id": "outxout-guide", "venue": "Out x Out guide", "url": "https://outxout.com/blog/spooky-bear-provincetown-2026" },
+  { "id": "outxout-event", "venue": "Out x Out listing", "url": "https://outxout.com/event/spooky-bear-provincetown-2026" },
+  { "id": "ptown-org-halloween", "venue": "Provincetown Business Guild Halloween calendar", "url": "https://ptown.org/calendars/halloween/" },
+  { "id": "ptownie-calendar", "venue": "ptownie calendar", "url": "https://ptownie.com/provincetown-calendar/" },
+  { "id": "ptownperch-halloween", "venue": "Ptown Perch Halloween roundup", "url": "https://ptownperch.com/events/halloween-provincetown/" },
+  { "id": "boatslip-elfsight", "venue": "Boatslip calendar widget", "url": "https://core.service.elfsight.com/p/boot/?w=588829d7-aa7e-42e8-8c6d-df5b85ccca54" },
+  { "id": "boatslip-events", "venue": "Boatslip", "url": "https://theboatslip.com/pages/events" },
+  { "id": "crown-events", "venue": "Crown & Anchor", "url": "https://onlyatthecrown.com/events/" },
+  { "id": "crown-events-oct31", "venue": "Crown & Anchor (Oct 31 list)", "url": "https://onlyatthecrown.com/events/list/?tribe-bar-date=2026-10-31" },
+  { "id": "crown-tryst", "venue": "Crown & Anchor tickets", "url": "https://tryst.events/profile/crown-anchor-provincetown" },
+  { "id": "gifford-sickening", "venue": "Gifford House tickets", "url": "https://sickening.events/" },
+  { "id": "redroom", "venue": "Red Room", "url": "https://redroom.club/" },
+  { "id": "pilgrim-house", "venue": "Pilgrim House", "url": "https://www.pilgrimhouseptown.com/tickets" },
+  { "id": "provincetown-inn", "venue": "Provincetown Inn", "url": "https://www.provincetowninn.com/entertainment" },
+  { "id": "governor-bradford", "venue": "Governor Bradford", "url": "https://thegovernorbradford.com/page/entertainment" },
+  { "id": "ahouse", "venue": "A-House", "url": "https://ahouse.com/" },
+  { "id": "tin-pan-alley", "venue": "Tin Pan Alley", "url": "https://www.tinpanalleyptown.com/shows" }
+]

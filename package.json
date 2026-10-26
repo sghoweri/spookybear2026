@@ -24,5 +24,8 @@
     "astro": "^7.4.2",
     "gray-matter": "^4.0.3",
     "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.3.0"
   }
 }
