@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 Sitemap: https://spookybear2026.com/sitemap-index.xml
 Disallow: /fragments/
+
+# Plain-text overview for assistants: https://spookybear2026.com/llms.txt

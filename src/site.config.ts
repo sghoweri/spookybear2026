@@ -6,7 +6,7 @@ export const SITE = {
   gaId: 'G-9W31GZXY39',
   timezone: 'America/New_York',
   /** Official organizer, for the "not affiliated" disclaimer. */
-  organizer: { name: 'Northeast Ursamen', url: 'https://www.neursamen.org/' },
+  organizer: { name: 'Northeast Ursamen', url: 'https://www.ursamen.org/spookybear' },
   author: { name: 'Salem', url: 'https://github.com/sghoweri' },
 } as const;
 

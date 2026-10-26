@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site.config';
+const updated = 'October 26, 2026';
+---
+
+<Base title="Privacy" description="What spookybear2026.com collects (very little), why, and what it never does with it.">
+  <article class="wrap privacy">
+    <h1>Privacy</h1>
+    <p class="lede">
+      Short version: this is a one-person fan site, paid for out of pocket. It collects the bare minimum needed to
+      know the site works, and nothing about you is ever sold, shared for marketing, or used to target you.
+    </p>
+
+    <div class="prose">
+      <h2>What’s collected</h2>
+      <ul>
+        <li>
+          <strong>Basic analytics</strong> (Google Analytics 4). Page views and a handful of anonymous interaction
+          counts, such as how many people tapped a filter or saved an event, so I can tell what’s useful. IP
+          anonymisation is on, there is no advertising or remarketing, and Google Signals is off. It runs in a
+          background worker so it never slows the page down.
+        </li>
+        <li>
+          <strong>Error monitoring</strong> (Sentry, free tier). If the site throws a JavaScript error in your browser,
+          the error message, the page URL and your browser version are sent so I can fix it. No session replays, no
+          personal details.
+        </li>
+        <li>
+          <strong>Feedback form.</strong> If you send a correction or bug report, your message and the optional links
+          you include become a public issue on GitHub. If you add an email address it is <em>not</em> published; it’s
+          kept only so I can reply, and it isn’t used for anything else.
+        </li>
+        <li>
+          <strong>Hosting logs.</strong> The site is served by Vercel, which keeps standard, short-lived server logs
+          (request paths, IP addresses) as every host does.
+        </li>
+      </ul>
+
+      <h2>What stays on your device</h2>
+      <p>
+        “My den” favourites, the day you last picked, and the filters you set live only in your browser’s local
+        storage. They never leave your device and I can’t see them. Clear your browser data and they’re gone.
+      </p>
+
+      <h2>What never happens</h2>
+      <ul>
+        <li>No accounts, no sign-up, no email list.</li>
+        <li>No selling, renting or sharing data with anyone.</li>
+        <li>No advertising, retargeting, or cross-site tracking of any kind.</li>
+        <li>No fingerprinting, no replaying your session.</li>
+      </ul>
+
+      <h2>Cookies</h2>
+      <p>
+        Google Analytics sets its own first-party cookies to tell returning visitors from new ones. Nothing else on
+        the site sets a cookie. If you block analytics with a content blocker, everything still works.
+      </p>
+
+      <h2>Questions</h2>
+      <p>
+        <a href="mailto:me@salemghoweri.com?subject=spookybear2026.com%20privacy">Email me</a> or
+        <a href={`${SITE.repo}/issues`} rel="noopener" target="_blank">open an issue</a>. Last updated {updated}.
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .privacy {
+    padding-top: 24px;
+  }
+  h1 {
+    font-size: clamp(2rem, 7vw, 3rem);
+    margin-bottom: 14px;
+  }
+  .lede {
+    max-width: 62ch;
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+</style>

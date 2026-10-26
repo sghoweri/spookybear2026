@@ -35,8 +35,11 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
   ${paw(900, 520, 2.1, -25, '#ff7a1a')}
   ${paw(1010, 430, 2.1, -8, '#ff7a1a')}
   ${paw(1110, 530, 2.1, 10, '#ff7a1a')}
-  ${text('Spooky Bear', 80, 215, 132, '#fff1dc')}
-  ${text('2026', 80, 350, 132, '#ff5c9a')}
+  <!-- Glyphs are generated at 120px and scaled: librsvg mis-parses this face's digit outlines at some sizes. -->
+  <g transform="translate(80 215) scale(1.1) translate(-80 -215)">
+    ${text('Spooky Bear', 80, 215, 120, '#fff1dc')}
+    ${text('2026', 80, 338, 120, '#ff5c9a')}
+  </g>
   <text x="84" y="430" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="38" font-weight="600" fill="#d9c4cf">Provincetown, Oct 29 to Nov 1</text>
   <text x="84" y="485" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="30" fill="#a98fb0">The unofficial all-in-one schedule</text>
   <text x="84" y="560" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="30" font-weight="600" fill="#ff7a1a">spookybear2026.com</text>

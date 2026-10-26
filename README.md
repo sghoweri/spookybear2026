@@ -48,6 +48,26 @@ npm run update:images                    # download any new promo images
 The original research dumps that seeded the site are in `data/research/`; `scripts/merge-research.mjs` de-duplicates
 several of those into one file for `ingest.mjs`.
 
+## Tests
+
+```bash
+yarn test            # builds, serves dist on :4322, runs Playwright (phone + desktop)
+yarn test:ui         # Playwright UI mode
+BASE_URL=https://spookybear2026.com yarn test   # against production
+```
+
+## Feedback form and error monitoring
+
+- `api/feedback.js` is the only backend: a Vercel function that turns the on-site form into a GitHub issue.
+  It needs `FEEDBACK_GITHUB_TOKEN` (fine-grained PAT, this repo only, Issues: read and write) in Vercel's env.
+  Without it the form shows a friendly "use GitHub instead" message.
+- Sentry loads lazily, only after the first JavaScript error, when `PUBLIC_SENTRY_DSN` is set. No error, no download.
+
+## Feeds for robots and assistants
+
+`/events.json`, `/events.ics`, `/llms.txt`, `/sitemap-index.xml`, plus schema.org Event JSON-LD on every event page
+(with `isBasedOn` sources) and a Festival/ItemList block on the home page.
+
 ## Analytics
 
 Google Analytics (`G-…` id in `src/site.config.ts`) loads through [Partytown](https://partytown.qwik.dev/) in a web

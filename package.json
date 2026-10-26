@@ -15,12 +15,17 @@
     "update:fetch": "node scripts/update-events.mjs fetch",
     "update:extract": "node scripts/update-events.mjs extract",
     "update:images": "node scripts/fetch-images.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "favicons": "node scripts/favicons.mjs",
+    "serve": "node scripts/serve-dist.mjs 4322"
   },
   "dependencies": {
     "@astrojs/partytown": "^2.1.9",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource/alfa-slab-one": "^5.3.0",
+    "@sentry/browser": "^11.9.0",
     "astro": "^7.4.2",
     "fuse.js": "^7.5.0",
     "gray-matter": "^4.0.3",
@@ -32,5 +37,6 @@
     "favicons": "^7.3.1",
     "opentype.js": "^2.0.0"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@1.22.22",
+  "license": "MIT"
 }

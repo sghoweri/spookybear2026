@@ -38,12 +38,21 @@ const ga = import.meta.env.PROD ? SITE.gaId : '';
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
-    {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#15081f" />
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Spooky Bear" />
+    <meta name="application-name" content={SITE.name} />
+    <meta name="robots" content={noindex ? 'noindex' : 'index, follow, max-image-preview:large'} />
+    <link rel="alternate" type="application/json" title="All events (JSON)" href="/events.json" />
+    <link rel="alternate" type="text/calendar" title="All events (iCalendar)" href="/events.ics" />
+    <link rel="author" href="/about" />
+    <link rel="privacy-policy" href="/privacy" />
     <link rel="preload" href="/fonts/alfa-slab-one.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -83,6 +92,7 @@ const ga = import.meta.env.PROD ? SITE.gaId : '';
     <Footer />
     <FeedbackDialog />
     <script src="../scripts/feedback.ts"></script>
+    <script src="../scripts/monitoring.ts"></script>
   </body>
 </html>
 

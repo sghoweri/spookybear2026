@@ -514,7 +514,10 @@ function init(root: HTMLElement) {
   }
   function showDialog() {
     setMenuOpen(null);
-    if (dialog.open && !dialog.matches(':modal')) dialog.close();
+    // A server-rendered <dialog open> (shared links) is non-modal. Drop the attribute
+    // instead of calling close(), which would queue a 'close' event that fires after
+    // showModal() and would tear the modal straight back down.
+    if (dialog.open && !dialog.matches(':modal')) dialog.removeAttribute('open');
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('has-dialog');
     dialog.querySelector<HTMLElement>('.dialog-card')?.scrollTo(0, 0);

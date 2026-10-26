@@ -14,3 +14,6 @@ Unofficial Spooky Bear (Provincetown Halloween bear weekend, Oct 29 to Nov 1 202
 - Perf matters: no client frameworks, one vanilla script (`src/scripts/schedule.ts`), event details load as `/fragments/<slug>`.
   GA4 (`G-9W31GZXY39`) loads via Partytown, production builds only.
 - Deploy: push to `main` (Vercel Git integration) or `vercel deploy --prod --yes`.
+- Tests: `yarn test` (Playwright, builds then serves dist on :4322). Keep `data-*` hooks in the markup; the tests rely on them.
+- Env vars (Vercel): `FEEDBACK_GITHUB_TOKEN` (feedback form -> GitHub issues), `PUBLIC_SENTRY_DSN` (lazy Sentry). Both optional.
+- Feeds: `/events.json`, `/events.ics`, `/llms.txt` come from `src/lib/feed.ts`; keep them in sync with the event schema.

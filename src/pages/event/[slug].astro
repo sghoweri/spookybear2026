@@ -41,6 +41,11 @@ const jsonLd = {
     ? { '@type': 'Offer', url: d.ticketUrl ?? d.infoUrl ?? undefined, price: kind === 'free' ? '0' : undefined, priceCurrency: 'USD', availability: 'https://schema.org/InStock' }
     : undefined,
   url: `${SITE.url}/event/${event.id}`,
+  isBasedOn: d.sources,
+  sameAs: [d.infoUrl, d.ticketUrl].filter(Boolean),
+  dateModified: d.lastVerified ?? undefined,
+  isAccessibleForFree: kind === 'free' ? true : undefined,
+  maintainer: { '@type': 'Person', name: SITE.author.name, url: SITE.author.url },
 };
 ---
 

@@ -4,11 +4,50 @@ import Base from '../layouts/Base.astro';
 import Schedule from '../components/Schedule.astro';
 import Hero from '../components/Hero.astro';
 
+import { SITE, DAYS } from '../site.config';
+import { isoDateTime, sortEvents } from '../lib/events';
+
 const events = await getCollection('events');
 const venues = await getCollection('venues');
+const venueById = new Map(venues.map((v) => [v.id, v]));
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.name,
+    url: SITE.url,
+    description: SITE.tagline,
+    inLanguage: 'en-US',
+    author: { '@type': 'Person', name: SITE.author.name, url: SITE.author.url },
+    isAccessibleForFree: true,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Festival',
+    name: 'Spooky Bear 2026 (unofficial schedule)',
+    description: 'Provincetown\u2019s Halloween bear weekend. This is an unofficial compilation of events from venues and organisers; see each event for its sources.',
+    url: SITE.url,
+    startDate: DAYS[0].date,
+    endDate: DAYS[DAYS.length - 1].date,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: { '@type': 'Place', name: 'Provincetown, MA', address: { '@type': 'PostalAddress', addressLocality: 'Provincetown', addressRegion: 'MA', addressCountry: 'US' } },
+    organizer: { '@type': 'Organization', name: SITE.organizer.name, url: SITE.organizer.url },
+    subEvent: sortEvents(events).map((e) => ({
+      '@type': 'Event',
+      name: e.data.title,
+      url: `${SITE.url}/event/${e.id}`,
+      startDate: isoDateTime(e.data.date, e.data.start) ?? e.data.date,
+      endDate: isoDateTime(e.data.date, e.data.end),
+      location: { '@type': 'Place', name: venueById.get(e.data.venue.id)?.data.name, address: venueById.get(e.data.venue.id)?.data.address },
+    })),
+  },
+];
 ---
 
 <Base>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
   <Hero count={events.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
   <Schedule events={events} venues={venues} />
 </Base>

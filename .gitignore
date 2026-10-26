@@ -29,3 +29,5 @@ data/snapshots/
 data/proposed/
 .vercel
 .env*
+test-results/
+playwright-report/

@@ -15,6 +15,11 @@ export default defineConfig({
     partytown({ config: { forward: ['dataLayer.push'] } }),
     sitemap({ filter: (page) => !page.includes('/fragments/') }),
   ],
+  vite: {
+    define: {
+      'import.meta.env.PUBLIC_COMMIT_SHA': JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev'),
+    },
+  },
   image: {
     // Remote promo images are downloaded by scripts/fetch-images.mjs into
     // src/content/events/images so the build never depends on third-party hosts.
