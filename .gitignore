@@ -27,3 +27,5 @@ pnpm-debug.log*
 .vercel/
 data/snapshots/
 data/proposed/
+.vercel
+.env*

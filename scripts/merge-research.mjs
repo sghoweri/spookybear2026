@@ -94,7 +94,7 @@ function sameEvent(a, b) {
   const mb = mins(b.startTime);
   const close = ma === null || mb === null ? true : Math.abs(ma - mb) <= 30;
   const sim = similarity(a.title, b.title);
-  return (close && sim >= 0.5) || sim >= 0.8;
+  return close && sim >= 0.5;
 }
 function mergeInto(dst, src) {
   for (const [k, v] of Object.entries(src)) {
