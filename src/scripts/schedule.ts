@@ -262,6 +262,13 @@ function init(root: HTMLElement) {
     });
     tablist.classList.toggle('is-muted', searching);
     searchNote.hidden = !searching;
+    if (searching) {
+      // Matches that other filters are hiding: say so, and offer to show them.
+      const hiddenMatches = rows.filter((r) => searchHits!.has(r.dataset.slug!) && r.hidden).length;
+      const box = searchNote.querySelector<HTMLElement>('[data-search-hidden]')!;
+      box.hidden = hiddenMatches === 0;
+      searchNote.querySelector<HTMLElement>('[data-search-hidden-count]')!.textContent = String(hiddenMatches);
+    }
     denToggle.setAttribute('aria-pressed', String(filters.den));
     den.hidden = saved.size === 0 && !filters.den;
     viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === filters.view)));
@@ -474,7 +481,7 @@ function init(root: HTMLElement) {
     });
   }
 
-  function clearAll() {
+  function clearAll({ keepSearch = false } = {}) {
     filters.venue.clear();
     filters.type.clear();
     filters.price.clear();
@@ -482,7 +489,8 @@ function init(root: HTMLElement) {
     filters.den = false;
     root.querySelectorAll<HTMLInputElement>('[data-menu] input[type="checkbox"]').forEach((c) => (c.checked = false));
     timeFrom.value = timeTo.value = '';
-    setSearch('', { closeBar: true });
+    if (keepSearch) apply();
+    else setSearch('', { closeBar: true });
   }
 
   tabs.forEach((t) =>
@@ -509,7 +517,9 @@ function init(root: HTMLElement) {
     if (filters.den) den.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
   });
   root.addEventListener('click', (e) => {
-    if ((e.target as HTMLElement).closest('[data-clear]')) clearAll();
+    const t = e.target as HTMLElement;
+    if (t.closest('[data-clear-keep-search]')) clearAll({ keepSearch: true });
+    else if (t.closest('[data-clear]')) clearAll();
   });
 
   // ---- menus (multi-select dropdowns) --------------------------------------------

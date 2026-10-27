@@ -110,7 +110,13 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
         <input type="search" data-search-input placeholder="Search events, venues, performers…" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search events" enterkeyhint="search" />
         <button type="button" class="search-cancel" data-search-close>Cancel</button>
       </div>
-      <p class="search-note" data-search-note hidden>Searching across every day.</p>
+      <p class="search-note" data-search-note hidden>
+        <span>Searching across every day.</span>
+        <span data-search-hidden hidden>
+          <span data-search-hidden-count></span> more match your search but are hidden by your filters.
+          <button type="button" class="link" data-clear-keep-search>Show them</button>
+        </span>
+      </p>
     </div>
     <div class="fm-backdrop" data-menu-backdrop hidden></div>
   </div>
@@ -474,6 +480,12 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     margin: 6px 0 0;
     color: var(--faint);
     font-size: 0.85rem;
+  }
+  .search-note [data-search-hidden] {
+    color: var(--candle);
+  }
+  .search-note .link {
+    font-weight: 600;
   }
 
   /* Den ------------------------------------------------------------------ */

@@ -75,6 +75,19 @@ test.describe('schedule', () => {
     expect(await visibleRows(page).count()).toBeGreaterThan(5);
   });
 
+  test('search tells you when filters are hiding matches', async ({ page }) => {
+    await page.goto('/?day=thu&type=other&q=bingo');
+    const note = page.locator('[data-search-hidden]');
+    await expect(note).toBeVisible();
+    await expect(note).toContainText(/more match your search/);
+    await expect(page.locator('[data-event][data-slug="drag-bingo-for-a-cause"]')).toBeHidden();
+    await page.getByRole('button', { name: 'Show them' }).click();
+    await expect(page.locator('[data-event][data-slug="drag-bingo-for-a-cause"]')).toBeVisible();
+    await expect(note).toBeHidden();
+    await expect(page).toHaveURL(/q=bingo/);
+    await expect(page).not.toHaveURL(/type=/);
+  });
+
   test('clear all resets filters', async ({ page }) => {
     await page.goto('/?day=sat&venue=boatslip&price=free');
     const filtered = await visibleRows(page).count();
