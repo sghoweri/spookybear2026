@@ -84,6 +84,41 @@ test.describe('schedule', () => {
   });
 });
 
+test.describe('grid view', () => {
+  test('toggle shows the venue x time grid and syncs to the URL', async ({ page }) => {
+    await page.goto('/?day=sat');
+    await page.getByRole('button', { name: 'Grid view' }).click();
+    await expect(page).toHaveURL(/view=grid/);
+    const grid = page.locator('[data-day-group="sat"] [data-grid]');
+    await expect(grid).toBeVisible();
+    await expect(page.locator('[data-day-group="sat"] [data-list]')).toBeHidden();
+    expect(await grid.locator('[data-grid-event]:visible').count()).toBeGreaterThan(15);
+    await expect(grid.locator('[data-grid-lane]:visible').first()).toContainText(/Crown|Gifford|Boatslip|Red Room/);
+    // Blocks open the same dialog as rows.
+    await grid.locator('[data-grid-event][data-slug="drag-bingo-for-a-cause"]').click();
+    await expect(page.locator('#event-dialog')).toBeVisible();
+    await expect(page).toHaveURL(/\/event\/drag-bingo-for-a-cause$/);
+  });
+
+  test('filters collapse empty lanes in the grid', async ({ page }) => {
+    await page.goto('/?day=sat&view=grid&venue=boatslip');
+    const grid = page.locator('[data-day-group="sat"] [data-grid]');
+    await expect(grid).toBeVisible();
+    const lanes = grid.locator('[data-grid-lane]:visible');
+    expect(await lanes.count()).toBeGreaterThan(0);
+    for (const lane of await lanes.all()) await expect(lane).toHaveAttribute('data-venue', 'boatslip');
+    for (const block of await grid.locator('[data-grid-event]:visible').all()) await expect(block).toHaveAttribute('data-venue', 'boatslip');
+  });
+
+  test('grid preference persists across pages', async ({ page }) => {
+    await page.goto('/?day=fri');
+    await page.getByRole('button', { name: 'Grid view' }).click();
+    await page.goto('/?day=thu');
+    await expect(page.locator('[data-day-group="thu"] [data-grid]')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Grid view' })).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
 test.describe('event dialog', () => {
   test('opens from a row, updates the URL and title, closes back to the list', async ({ page }) => {
     await page.goto('/?day=sat');

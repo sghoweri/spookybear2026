@@ -1,0 +1,335 @@
+---
+/**
+ * One day of the schedule as a venue x time grid ("clash finder"). Venues and
+ * rooms are rows, 15-minute slots are columns, events are blocks you can tap.
+ * Filtering/visibility is handled in src/scripts/schedule.ts.
+ */
+import type { EventEntry, VenueEntry } from '../lib/events';
+import { priceKind, priceShort, fmtRange } from '../lib/events';
+import { buildDay, hourMarks, SLOTS } from '../lib/grid';
+import Paw from './Paw.astro';
+
+interface Props {
+  dayId: string;
+  events: EventEntry[];
+  venueById: Map<string, VenueEntry>;
+}
+const { dayId, events, venueById } = Astro.props;
+const { lanes, blocks, tba } = buildDay(events, venueById);
+const hours = hourMarks();
+---
+
+<div class="grid-view" data-grid={dayId} hidden>
+  <div class="grid-scroll" tabindex="0" aria-label="Schedule grid, scroll sideways for later in the day">
+    <div class="grid" style={`--slots: ${SLOTS}; --lanes: ${lanes.length};`} data-grid-table>
+      <div class="corner" aria-hidden="true"></div>
+      {
+        hours.map((h) => (
+          <div class="hour" style={`grid-column: ${h.slot + 2} / span 4;`} aria-hidden="true">
+            {h.label}
+          </div>
+        ))
+      }
+      <div class="shade" data-grid-shade hidden aria-hidden="true"></div>
+      <div class="now" data-grid-now hidden aria-hidden="true"><span>now</span></div>
+      {
+        lanes.map((l) => (
+          <div class:list={['lane', { 'lane-first': l.first }]} style={`grid-row: ${l.index + 2};`} data-grid-lane={l.index} data-venue={l.venueId}>
+            <span class="lane-name">{l.label}</span>
+            {l.sub && <span class="lane-sub">{l.sub}</span>}
+          </div>
+        ))
+      }
+      {
+        blocks.map((b) => {
+          const e = b.event;
+          const kind = priceKind(e);
+          const venue = venueById.get(e.data.venue.id)!;
+          return (
+            <a
+              class:list={['block', `block-${e.data.type}`, { 'block-short': b.endSlot - b.startSlot < 6, 'block-free': kind === 'free' }]}
+              style={`grid-row: ${b.lane + 2}; grid-column: ${b.startSlot + 2} / ${b.endSlot + 2};`}
+              href={`/event/${e.id}`}
+              data-open={e.id}
+              data-grid-event
+              data-slug={e.id}
+              data-lane={b.lane}
+              data-venue={venue.id}
+              data-area={venue.data.area}
+              data-type={e.data.type}
+              data-price={kind}
+              data-start={e.data.start ?? ''}
+              data-end={e.data.end ?? ''}
+              title={`${e.data.title}, ${fmtRange(e.data.start, e.data.end)}, ${venue.data.shortName ?? venue.data.name}`}
+            >
+              <span class="block-title">{e.data.title}</span>
+              <span class="block-meta">
+                <span class="block-time">{fmtRange(e.data.start, e.data.end)}</span>
+                <span class="block-price">{priceShort(e)}</span>
+              </span>
+              <span class="block-paw" aria-hidden="true"><Paw /></span>
+            </a>
+          );
+        })
+      }
+    </div>
+  </div>
+  {
+    tba.length > 0 && (
+      <p class="grid-tba">
+        No start time yet:
+        {tba.map((e, i) => (
+          <>
+            <a href={`/event/${e.id}`} data-open={e.id}>
+              {e.data.title}
+            </a>
+            {i < tba.length - 1 ? ', ' : ''}
+          </>
+        ))}
+      </p>
+    )
+  }
+  <p class="grid-hint">Each column is 15 minutes. Blocks show when a party actually runs, so overlaps are easy to spot.</p>
+</div>
+
+<style>
+  .grid-view {
+    --slot-w: 26px;
+    --label-w: 7.25rem;
+    --lane-h: 58px;
+    margin-top: 6px;
+  }
+  .grid-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    scrollbar-width: thin;
+    position: relative;
+  }
+  .grid-scroll:focus-visible {
+    outline-offset: -3px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: var(--label-w) repeat(var(--slots), var(--slot-w));
+    grid-template-rows: 34px repeat(var(--lanes), var(--lane-h));
+    position: relative;
+    min-width: max-content;
+    background-image: repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(var(--slot-w) * 4 - 1px),
+      var(--line) calc(var(--slot-w) * 4 - 1px),
+      var(--line) calc(var(--slot-w) * 4)
+    );
+    background-position: var(--label-w) 0;
+    background-size: calc(var(--slot-w) * 4) 100%;
+    background-repeat: repeat-x;
+  }
+  .corner {
+    grid-row: 1;
+    grid-column: 1;
+    position: sticky;
+    left: 0;
+    z-index: 4;
+    background: var(--surface);
+  }
+  .hour {
+    grid-row: 1;
+    align-self: center;
+    padding-left: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--faint);
+    white-space: nowrap;
+    border-left: 1px solid var(--line);
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .lane {
+    grid-column: 1;
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4px 10px 4px 12px;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    box-shadow: 6px 0 10px -8px rgba(0, 0, 0, 0.7);
+    font-size: 0.85rem;
+    line-height: 1.2;
+    min-width: 0;
+  }
+  .lane-first {
+    border-top-color: var(--plum-600);
+  }
+  .lane-first .lane-name {
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .lane-name {
+    color: var(--muted);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+  }
+  .lane-sub {
+    color: var(--faint);
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .block {
+    position: relative;
+    margin: 6px 2px 6px 1px;
+    padding: 6px 8px;
+    border-radius: 9px;
+    background: var(--raised);
+    border: 1px solid var(--plum-600);
+    border-left: 4px solid var(--pink);
+    color: var(--cream);
+    text-decoration: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    z-index: 1;
+    transition: border-color 0.15s, transform 0.15s var(--ease);
+  }
+  .block:hover {
+    border-color: var(--pink);
+    transform: translateY(-1px);
+  }
+  .block:focus-visible {
+    outline-offset: 0;
+  }
+  .block-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .block-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 0.72rem;
+    color: var(--faint);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .block-price {
+    color: var(--candle);
+    font-weight: 600;
+  }
+  .block-free .block-price {
+    color: var(--glass);
+  }
+  .block-short .block-meta {
+    display: none;
+  }
+  .block-short .block-title {
+    font-size: 0.76rem;
+  }
+  .block-paw {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    color: var(--paw);
+    display: none;
+  }
+  .block.is-saved {
+    border-color: var(--paw);
+    border-left-color: var(--paw);
+    background: linear-gradient(180deg, rgba(255, 122, 26, 0.16), rgba(255, 122, 26, 0.04)), var(--raised);
+  }
+  .block.is-saved .block-paw {
+    display: block;
+  }
+  .block.is-saved .block-title {
+    padding-right: 16px;
+  }
+  /* Type accents on the left edge. */
+  .block-tea-dance {
+    border-left-color: var(--glass);
+  }
+  .block-drag,
+  .block-show {
+    border-left-color: var(--candle);
+  }
+  .block-brunch,
+  .block-dining,
+  .block-market {
+    border-left-color: #c9a0ff;
+  }
+  .block-meetup,
+  .block-other,
+  .block-fundraiser {
+    border-left-color: var(--faint);
+  }
+
+  .shade {
+    grid-row: 1 / -1;
+    background: rgba(255, 92, 154, 0.08);
+    border-left: 1px dashed rgba(255, 92, 154, 0.5);
+    border-right: 1px dashed rgba(255, 92, 154, 0.5);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .now {
+    grid-row: 1 / -1;
+    width: 2px;
+    justify-self: start;
+    background: var(--pink);
+    pointer-events: none;
+    z-index: 2;
+    position: relative;
+  }
+  .now span {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--pink);
+    background: var(--surface);
+    padding: 0 4px;
+    border-radius: 4px;
+  }
+  .grid-tba,
+  .grid-hint {
+    color: var(--faint);
+    font-size: 0.85rem;
+    margin: 8px 4px 0;
+  }
+  .grid-tba a {
+    color: var(--muted);
+  }
+  @media (min-width: 720px) {
+    .grid-view {
+      --slot-w: 22px;
+      --label-w: 9rem;
+      --lane-h: 62px;
+    }
+    .block-title {
+      font-size: 0.88rem;
+    }
+  }
+  @media (min-width: 1100px) {
+    .grid-view {
+      --slot-w: 24px;
+    }
+  }
+</style>

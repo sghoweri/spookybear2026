@@ -5,6 +5,7 @@ import { DAYS, EVENT_TYPES } from '../site.config';
 import EventRow from './EventRow.astro';
 import EventDetail from './EventDetail.astro';
 import FilterMenu from './FilterMenu.astro';
+import GridDay from './GridDay.astro';
 import Paw from './Paw.astro';
 
 interface Props {
@@ -44,6 +45,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
 <section class="schedule" data-schedule data-initial-day={initialDay}>
   <div class="controls">
     <div class="wrap">
+      <div class="topbar">
       <div class="tabs" role="tablist" aria-label="Day">
         {
           byDay.map((d) => (
@@ -57,6 +59,17 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
           <span class="tab-short">All</span>
           <span class="tab-date">days</span>
         </button>
+      </div>
+      <div class="view-toggle" role="group" aria-label="View">
+        <button type="button" class="view-btn" data-view="list" aria-pressed="true" aria-label="List view">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12" /><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none" /><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none" /><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none" /></svg>
+          <span aria-hidden="true">List</span>
+        </button>
+        <button type="button" class="view-btn" data-view="grid" aria-pressed="false" aria-label="Grid view">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 10h18M9 4v16" /></svg>
+          <span aria-hidden="true">Grid</span>
+        </button>
+      </div>
       </div>
 
       <div class="filters" data-filters>
@@ -121,13 +134,14 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
                 {d.events.length} {d.events.length === 1 ? 'event' : 'events'}
               </span>
             </header>
-            <ol class="rows">
+            <ol class="rows" data-list>
               {d.events.map((e) => {
                 const venue = venueById.get(e.data.venue.id);
                 if (!venue) throw new Error(`Event ${e.id} references unknown venue "${e.data.venue.id}"`);
                 return <EventRow event={e} venue={venue} />;
               })}
             </ol>
+            <GridDay dayId={d.id} events={d.events} venueById={venueById} />
             <p class="day-empty" data-day-empty hidden>
               Nothing matches these filters on {d.label}.
             </p>
@@ -167,7 +181,54 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     border-bottom: 1px solid var(--line);
     padding: 8px 0 10px;
   }
+  .topbar {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .view-toggle {
+    flex: none;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 14px;
+    background: var(--surface);
+  }
+  .view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 42px;
+    padding: 0 10px;
+    border-radius: 10px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .view-btn:hover {
+    color: var(--cream);
+    background: var(--raised);
+  }
+  .view-btn[aria-pressed='true'] {
+    background: var(--raised);
+    color: var(--cream);
+    box-shadow: inset 0 0 0 1px var(--plum-600);
+  }
+  .view-btn span {
+    display: none;
+  }
+  @media (min-width: 720px) {
+    .view-btn span {
+      display: inline;
+    }
+    .view-btn {
+      padding: 0 14px;
+    }
+  }
   .tabs {
+    flex: 1;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;

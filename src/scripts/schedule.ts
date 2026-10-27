@@ -13,7 +13,13 @@ const DAY_DATES: Record<string, string> = {
   sun: '2026-11-01',
 };
 
+const GRID_START = 9 * 60;
+const GRID_SLOT = 15;
+const GRID_SLOTS = (26 * 60 - GRID_START) / GRID_SLOT;
+const VIEW_KEY = 'sb26:view';
+
 type Filters = {
+  view: 'list' | 'grid';
   day: string;
   venue: Set<string>;
   type: Set<string>;
@@ -84,7 +90,7 @@ function init(root: HTMLElement) {
         if (label) label.textContent = on ? 'In my favs' : 'Save to my favs';
         else b.setAttribute('aria-label', `${on ? 'Remove' : 'Save'} ${titleFor(s)} ${on ? 'from' : 'to'} your favs`);
       });
-      document.querySelectorAll<HTMLElement>(`[data-event][data-slug="${s}"]`).forEach((r) => r.classList.toggle('is-saved', on));
+      document.querySelectorAll<HTMLElement>(`[data-event][data-slug="${s}"], [data-grid-event][data-slug="${s}"]`).forEach((r) => r.classList.toggle('is-saved', on));
       document.querySelectorAll<HTMLElement>(`[data-detail-slug="${s}"] [data-saved-badge]`).forEach((b) => (b.hidden = !on));
     }
     denCount.textContent = String(saved.size);
@@ -140,7 +146,15 @@ function init(root: HTMLElement) {
     const day = p.get('day');
     const initial = root.dataset.initialDay;
     const today = ptownDay();
+    let storedView: string | null = null;
+    try {
+      storedView = localStorage.getItem(VIEW_KEY);
+    } catch {
+      /* ignore */
+    }
+    const view = p.get('view') ?? storedView;
     return {
+      view: view === 'grid' ? 'grid' : 'list',
       day: day && (day === 'all' || availableDays.has(day)) ? day : initial && availableDays.has(initial) ? initial : today && availableDays.has(today) ? today : 'all',
       venue: list('venue'),
       type: list('type'),
@@ -224,6 +238,7 @@ function init(root: HTMLElement) {
       });
       total += shown;
       g.hidden = !dayOn || (searching && shown === 0);
+      syncGrid(g, win);
       const empty = g.querySelector<HTMLElement>('[data-day-empty]');
       if (empty) empty.hidden = !dayOn || shown > 0;
       const count = g.querySelector<HTMLElement>('[data-day-count]');
@@ -242,6 +257,7 @@ function init(root: HTMLElement) {
     searchNote.hidden = !searching;
     denToggle.setAttribute('aria-pressed', String(filters.den));
     den.hidden = saved.size === 0 && !filters.den;
+    viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === filters.view)));
     const active = Boolean(filters.venue.size || filters.type.size || filters.price.size || filters.den || win || filters.q);
     filtersBar.querySelectorAll<HTMLElement>('[data-clear]').forEach((b) => (b.hidden = !active));
     paintMenus();
@@ -259,7 +275,112 @@ function init(root: HTMLElement) {
     if (filters.to) p.set('to', filters.to);
     if (filters.den) p.set('den', '1');
     if (filters.q) p.set('q', filters.q);
+    if (filters.view === 'grid') p.set('view', 'grid');
     history.replaceState(history.state, '', `/?${p.toString()}`);
+  }
+
+  // ---- grid view --------------------------------------------------------------
+  const viewBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-view]'));
+  viewBtns.forEach((b) =>
+    b.addEventListener('click', () => {
+      const v = b.dataset.view === 'grid' ? 'grid' : 'list';
+      if (v === filters.view) return;
+      filters.view = v;
+      try {
+        localStorage.setItem(VIEW_KEY, v);
+      } catch {
+        /* ignore */
+      }
+      apply();
+      if (v === 'grid') scrollGridsToStart();
+      track('view', v);
+    }),
+  );
+
+  function slotOf(min: number) {
+    return Math.min(GRID_SLOTS, Math.max(0, Math.round((min - GRID_START) / GRID_SLOT)));
+  }
+
+  /** Mirror the list's row visibility onto the day's grid blocks, collapse empty lanes, toggle views. */
+  function syncGrid(g: HTMLElement, win: [number, number] | null) {
+    const list = g.querySelector<HTMLElement>('[data-list]');
+    const grid = g.querySelector<HTMLElement>('[data-grid]');
+    if (!list || !grid) return;
+    const showGrid = filters.view === 'grid';
+    list.hidden = !showGrid ? false : true;
+    grid.hidden = !showGrid;
+    if (!showGrid) return;
+    const hiddenBySlug = new Map<string, boolean>();
+    g.querySelectorAll<HTMLElement>('[data-event]').forEach((r) => hiddenBySlug.set(r.dataset.slug!, r.hidden));
+    const laneHasVisible = new Map<string, boolean>();
+    grid.querySelectorAll<HTMLElement>('[data-grid-event]').forEach((b) => {
+      const hidden = hiddenBySlug.get(b.dataset.slug!) ?? true;
+      b.hidden = hidden;
+      if (!hidden) laneHasVisible.set(b.dataset.lane!, true);
+    });
+    // Renumber visible lanes so the grid has no gaps.
+    const laneRow = new Map<string, number>();
+    let n = 0;
+    grid.querySelectorAll<HTMLElement>('[data-grid-lane]').forEach((l) => {
+      const id = l.dataset.gridLane!;
+      const on = laneHasVisible.get(id) === true;
+      l.hidden = !on;
+      if (on) {
+        n++;
+        laneRow.set(id, n + 1);
+        l.style.gridRow = String(n + 1);
+      }
+    });
+    grid.querySelectorAll<HTMLElement>('[data-grid-event]').forEach((b) => {
+      const row = laneRow.get(b.dataset.lane!);
+      if (row) b.style.gridRow = String(row);
+    });
+    const table = grid.querySelector<HTMLElement>('[data-grid-table]');
+    table?.style.setProperty('--lanes', String(Math.max(n, 1)));
+    // Time-window shading.
+    const shade = grid.querySelector<HTMLElement>('[data-grid-shade]');
+    if (shade) {
+      if (win) {
+        shade.hidden = false;
+        shade.style.gridColumn = `${slotOf(win[0]) + 2} / ${Math.max(slotOf(win[0]) + 3, slotOf(win[1]) + 2)}`;
+      } else shade.hidden = true;
+    }
+    paintGridNow(g);
+  }
+
+  function paintGridNow(g: HTMLElement) {
+    const now = g.querySelector<HTMLElement>('[data-grid-now]');
+    if (!now) return;
+    const { date, hour, minute } = nowInPtown();
+    let m = hour * 60 + minute;
+    let day = date;
+    if (hour < 5) {
+      m += 24 * 60;
+      const x = new Date(`${date}T12:00:00Z`);
+      x.setUTCDate(x.getUTCDate() - 1);
+      day = x.toISOString().slice(0, 10);
+    }
+    const isToday = DAY_DATES[g.dataset.dayGroup!] === day;
+    const inRange = m >= GRID_START && m < GRID_START + GRID_SLOTS * GRID_SLOT;
+    now.hidden = !(isToday && inRange);
+    if (!now.hidden) now.style.gridColumn = String(slotOf(m) + 2);
+  }
+
+  /** First time a grid shows, scroll it to "now" during the weekend, otherwise to early afternoon. */
+  function scrollGridsToStart() {
+    root.querySelectorAll<HTMLElement>('[data-day-group]:not([hidden]) [data-grid]:not([hidden])').forEach((grid) => {
+      const scroller = grid.querySelector<HTMLElement>('.grid-scroll');
+      if (!scroller || scroller.dataset.scrolled) return;
+      scroller.dataset.scrolled = '1';
+      const slotW = parseFloat(getComputedStyle(grid).getPropertyValue('--slot-w')) || 26;
+      const now = grid.querySelector<HTMLElement>('[data-grid-now]');
+      let target = 14 * 60;
+      if (now && !now.hidden) {
+        const { hour, minute } = nowInPtown();
+        target = (hour < 5 ? hour + 24 : hour) * 60 + minute - 60;
+      }
+      scroller.scrollLeft = Math.max(0, (slotOf(target) - 2) * slotW);
+    });
   }
 
   function clearAll() {
@@ -278,6 +399,7 @@ function init(root: HTMLElement) {
       filters.day = t.dataset.dayTab!;
       if (searchHits) setSearch('', { closeBar: true });
       else apply();
+      if (filters.view === 'grid') scrollGridsToStart();
       track('select_day', filters.day);
     }),
   );
@@ -680,7 +802,11 @@ function init(root: HTMLElement) {
   paintSaved();
   apply();
   paintNow();
-  setInterval(paintNow, 60_000);
+  if (filters.view === 'grid') scrollGridsToStart();
+  setInterval(() => {
+    paintNow();
+    groups.forEach(paintGridNow);
+  }, 60_000);
 
   const m = location.pathname.match(/^\/event\/([^/]+)\/?$/);
   if (m) {
