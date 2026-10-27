@@ -304,3 +304,25 @@ svg {
 body.has-sheet {
   overflow: hidden;
 }
+
+/* "My favs" groups are built in JS, so they are styled here rather than in Schedule.astro's scoped CSS. */
+[data-den-list] .rows {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 4px 10px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+}
+.den-day {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: var(--cream);
+  margin: 12px 0 6px 4px;
+}
+.den-day span {
+  color: var(--pink);
+  font-weight: 500;
+  margin-left: 8px;
+}

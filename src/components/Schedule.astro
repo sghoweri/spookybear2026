@@ -438,21 +438,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   .den-empty {
     padding: 8px 0 10px;
   }
-  .den-day {
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--cream);
-    margin: 10px 0 6px 4px;
-  }
-  .den-day span {
-    color: var(--pink);
-    font-weight: 500;
-    margin-left: 8px;
-  }
-  [data-den-list] .rows {
-    margin-bottom: 4px;
-  }
+
   .den:has([data-den-list] > *) .den-empty {
     display: none;
   }
