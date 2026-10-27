@@ -29,6 +29,7 @@ export const GET: APIRoute = async () => {
     `X-WR-CALDESC:${esc(SITE.tagline)}`,
   ];
   for (const e of items) {
+    if (e.placeholder) continue;
     const start = e.start ?? '12:00';
     let endDate = e.date;
     let end = e.end;

@@ -10,6 +10,8 @@ import { isoDateTime, sortEvents } from '../lib/events';
 const events = await getCollection('events');
 const venues = await getCollection('venues');
 const venueById = new Map(venues.map((v) => [v.id, v]));
+/** Standing bar-hours entries stay out of the structured data and the headline count. */
+const real = events.filter((e) => !e.data.placeholder);
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -32,7 +34,7 @@ const jsonLd = [
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: { '@type': 'Place', name: 'Provincetown, MA', address: { '@type': 'PostalAddress', addressLocality: 'Provincetown', addressRegion: 'MA', addressCountry: 'US' } },
     organizer: { '@type': 'Organization', name: SITE.organizer.name, url: SITE.organizer.url },
-    subEvent: sortEvents(events).map((e) => ({
+    subEvent: sortEvents(real).map((e) => ({
       '@type': 'Event',
       name: e.data.title,
       url: `${SITE.url}/event/${e.id}`,
@@ -48,6 +50,6 @@ const jsonLd = [
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
-  <Hero count={events.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
+  <Hero count={real.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
   <Schedule events={events} venues={venues} />
 </Base>

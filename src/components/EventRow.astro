@@ -15,8 +15,9 @@ const venueName = venue.data.shortName ?? venue.data.name;
 ---
 
 <li
-  class="row"
+  class:list={['row', { 'row-placeholder': data.placeholder }]}
   data-event
+  data-placeholder={data.placeholder ? '' : undefined}
   data-slug={event.id}
   data-day={dayIdFor(data.date)}
   data-date={data.date}
@@ -33,10 +34,18 @@ const venueName = venue.data.shortName ?? venue.data.name;
       <span class="row-title">{data.title}</span>
       <span class="row-meta">
         <span class="row-venue">{venueName}</span>
-        <span class="badge">{typeLabel(data.type)}</span>
-        <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]} title={priceLabel(event)}>
-          {priceShort(event)}
-        </span>
+        {
+          data.placeholder ? (
+            <span class="badge badge-placeholder">Bar hours</span>
+          ) : (
+            <>
+              <span class="badge">{typeLabel(data.type)}</span>
+              <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]} title={priceLabel(event)}>
+                {priceShort(event)}
+              </span>
+            </>
+          )
+        }
         <span class="badge badge-now" data-now hidden>Now</span>
       </span>
     </span>
@@ -106,6 +115,14 @@ const venueName = venue.data.shortName ?? venue.data.name;
   }
   .row-venue {
     color: var(--muted);
+  }
+  /* Standing "this bar is open" entries read as a hint, not a headline. */
+  .row-placeholder .row-title {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .row-placeholder .row-time {
+    color: var(--faint);
   }
   .paw {
     display: grid;

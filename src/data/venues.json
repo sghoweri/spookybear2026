@@ -178,5 +178,17 @@
     "mapsUrl": "https://maps.google.com/?q=322+Commercial+St+Provincetown+MA",
     "hours": null,
     "notes": "Walking ghost tour; meet outside 322 Commercial St."
+  },
+  {
+    "id": "eric-lesh-gallery",
+    "name": "Eric Lesh Gallery",
+    "shortName": "Eric Lesh Gallery",
+    "address": "237 Commercial St, Provincetown, MA 02657",
+    "area": "Center",
+    "url": "https://ericlesh.org/",
+    "instagram": "ericleshgallery",
+    "mapsUrl": "https://maps.google.com/?q=237+Commercial+St+Provincetown+MA",
+    "hours": null,
+    "notes": "Art gallery in the center of town; sessions book through the gallery's scheduling page."
   }
 ]

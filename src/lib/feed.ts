@@ -32,6 +32,8 @@ export async function loadFeed() {
       ageRestriction: d.ageRestriction ?? null,
       dressCode: d.dressCode ?? null,
       tags: d.tags,
+      /** True for standing "this bar is open" entries that are not real events. */
+      placeholder: d.placeholder,
       description: (e.body ?? '').replace(/<!--[\s\S]*?-->/g, '').trim(),
       sources: d.sources,
       confidence: d.confidence,

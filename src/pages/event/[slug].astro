@@ -20,8 +20,10 @@ const d = event.data;
 const description = `${longDate(d.date)}, ${fmtRange(d.start, d.end)} at ${venue.data.name}. ${d.body?.trim().split('\n')[0] ?? ''}`.slice(0, 200);
 const ogImage = d.image ? d.image.src : '/og.png';
 const kind = priceKind(event);
+const real = events.filter((e) => !e.data.placeholder);
 
-const jsonLd = {
+/** Standing bar-hours entries are not events, so they get no Event structured data. */
+const jsonLd = d.placeholder ? null : {
   '@context': 'https://schema.org',
   '@type': 'Event',
   name: d.title,
@@ -51,8 +53,8 @@ const jsonLd = {
 
 <Base title={d.title} description={description} image={ogImage} ogType="article">
   <Fragment slot="head">
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </Fragment>
-  <Hero count={events.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
+  <Hero count={real.length} venues={new Set(events.map((e) => e.data.venue.id)).size} />
   <Schedule events={events} venues={venues} openSlug={event.id} />
 </Base>

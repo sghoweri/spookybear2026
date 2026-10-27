@@ -39,7 +39,7 @@ export const GET: APIRoute = async () => {
       currentDate = e.date;
       out.push(`### ${longDate(e.date)}, 2026`, '');
     }
-    out.push(`- **${e.title}** — ${e.timeLabel}, ${e.location ? e.location + ' at ' : ''}${e.venue.name} (${e.venue.address}). ${e.typeLabel}. Price: ${e.price}.${e.organizer ? ` Hosted by ${e.organizer}.` : ''}`);
+    out.push(`- **${e.title}** — ${e.timeLabel}, ${e.location ? e.location + ' at ' : ''}${e.venue.name} (${e.venue.address}). ${e.typeLabel}. Price: ${e.price}.${e.organizer ? ` Hosted by ${e.organizer}.` : ''}${e.placeholder ? ' Standing entry: the bar is open as usual; no Spooky Bear-specific events have been posted.' : ''}`);
     out.push(`  - Page: ${e.url}`);
     if (e.ticketUrl) out.push(`  - Tickets: ${e.ticketUrl}`);
     if (e.sources.length) out.push(`  - Sources: ${e.sources.join(', ')}`);

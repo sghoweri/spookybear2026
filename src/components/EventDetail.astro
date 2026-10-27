@@ -56,11 +56,19 @@ const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) :
     </p>
     <h2 id={inDialog ? 'dialog-title' : undefined} class="detail-title">{data.title}</h2>
     <p class="detail-badges">
-      <span class="badge">{typeLabel(data.type)}</span>
+      <span class:list={['badge', { 'badge-placeholder': data.placeholder }]}>{data.placeholder ? 'Bar hours' : typeLabel(data.type)}</span>
       <span class:list={['badge', { 'badge-free': kind === 'free', 'badge-paid': kind === 'paid' }]}>{priceLabel(event)}</span>
       {data.ageRestriction && <span class="badge">{data.ageRestriction}</span>}
       {data.tags.map((t) => <span class="badge">{t}</span>)}
     </p>
+
+    {
+      data.placeholder && (
+        <p class="detail-note">
+          Nothing Spooky Bear-specific has been posted for this bar yet. This entry is here so it still shows up in your plans; the hours are the bar’s usual ones, not an event.
+        </p>
+      )
+    }
 
     <div class="detail-actions">
       {
@@ -116,7 +124,7 @@ const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) :
         <dt>Price</dt>
         <dd>
           <strong>{priceLabel(event)}</strong>
-          {kind === 'unknown' && <span class="sub">We couldn’t confirm a price. Check the venue.</span>}
+          {kind === 'unknown' && !data.placeholder && <span class="sub">We couldn’t confirm a price. Check the venue.</span>}
         </dd>
       </div>
       {
@@ -217,6 +225,15 @@ const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) :
     flex-wrap: wrap;
     gap: 6px;
     margin: 0 0 16px;
+  }
+  .detail-note {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--plum-600);
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.45;
   }
   .detail-actions {
     display: flex;

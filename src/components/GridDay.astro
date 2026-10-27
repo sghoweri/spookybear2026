@@ -47,7 +47,7 @@ const hours = hourMarks();
           const venue = venueById.get(e.data.venue.id)!;
           return (
             <div
-              class:list={['block', `block-${e.data.type}`, { 'block-short': b.endSlot - b.startSlot < 6, 'block-free': kind === 'free' }]}
+              class:list={['block', `block-${e.data.type}`, { 'block-short': b.endSlot - b.startSlot < 6, 'block-free': kind === 'free', 'block-placeholder': e.data.placeholder }]}
               style={`grid-row: ${b.lane + 2}; grid-column: ${b.startSlot + 2} / ${b.endSlot + 2};`}
               data-grid-event
               data-slug={e.id}
@@ -63,7 +63,7 @@ const hours = hourMarks();
                 <span class="block-title">{e.data.title}</span>
                 <span class="block-meta">
                   <span class="block-time">{fmtRange(e.data.start, e.data.end)}</span>
-                  <span class="block-price">{priceShort(e)}</span>
+                  <span class="block-price">{e.data.placeholder ? 'No posted events yet' : priceShort(e)}</span>
                 </span>
               </a>
               <button class="block-paw" type="button" data-paw={e.id} aria-pressed="false" aria-label={`Save ${e.data.title} to your favs`} title="Save to your favs">
@@ -293,6 +293,21 @@ const hours = hourMarks();
     border-color: var(--paw);
     border-left-color: var(--paw);
     background: linear-gradient(180deg, rgba(255, 122, 26, 0.16), rgba(255, 122, 26, 0.04)), var(--raised);
+  }
+  /* Standing bar-hours entries: outlined, not filled, so real events stand out. */
+  .block-placeholder {
+    background: transparent;
+    border-style: dashed;
+    border-left-style: solid;
+    border-left-color: var(--plum-600);
+    color: var(--muted);
+  }
+  .block-placeholder .block-price {
+    color: var(--faint);
+    font-weight: 500;
+  }
+  .block-placeholder.is-saved {
+    border-style: solid;
   }
   /* Type accents on the left edge. */
   .block-tea-dance {

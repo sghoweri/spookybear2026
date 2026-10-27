@@ -39,6 +39,8 @@ const events = defineCollection({
       dressCode: z.string().nullable().optional(),
       tags: z.array(z.string()).default([]),
       featured: z.boolean().default(false),
+      /** A standing "this bar is open" entry for a venue with no posted events; styled as a hint, kept out of calendars and structured data. */
+      placeholder: z.boolean().default(false),
       sources: z.array(z.string().url()).default([]),
       confidence: z.enum(['high', 'medium', 'low']).default('medium'),
       /** When true, scripts/update-events.mjs will never rewrite this file. */
