@@ -22,7 +22,7 @@ export const DAYS = [
 export type DayId = (typeof DAYS)[number]['id'];
 
 export const EVENT_TYPES = {
-  party: 'Party',
+  party: 'Dance Party',
   'tea-dance': 'Tea dance',
   drag: 'Drag',
   show: 'Show',
@@ -30,7 +30,6 @@ export const EVENT_TYPES = {
   market: 'Market',
   brunch: 'Brunch',
   meetup: 'Meetup',
-  dance: 'Dance party',
   fundraiser: 'Fundraiser',
   dining: 'Food & drink',
   other: 'Other',

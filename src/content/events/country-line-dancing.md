@@ -5,7 +5,7 @@ location: Wilde Playhouse
 date: '2026-10-28'
 start: '19:00'
 end: '21:00'
-type: dance
+type: other
 price: null
 isFree: null
 ticketUrl: null
