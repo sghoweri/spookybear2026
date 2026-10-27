@@ -90,14 +90,31 @@ function init(root: HTMLElement) {
     denCount.textContent = String(saved.size);
     renderDen();
   }
+  const DAY_LABELS: Record<string, string> = { wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
+  const DAY_NICKS: Record<string, string> = { wed: 'Early arrivals', thu: 'Kickoff', fri: 'Devil\u2019s night', sat: 'Halloween', sun: 'Last call' };
+
+  /** Favourites, grouped by day in weekend order (rows are already in schedule order). */
   function renderDen() {
     denList.replaceChildren();
-    for (const r of rows.filter((r) => saved.has(r.dataset.slug!))) {
-      const clone = r.cloneNode(true) as HTMLElement;
-      clone.removeAttribute('data-event');
-      clone.hidden = false;
-      clone.dataset.denClone = '';
-      denList.append(clone);
+    for (const day of DAY_IDS) {
+      const picks = rows.filter((r) => r.dataset.day === day && saved.has(r.dataset.slug!));
+      if (!picks.length) continue;
+      const h = document.createElement('h3');
+      h.className = 'den-day';
+      h.textContent = DAY_LABELS[day];
+      const nick = document.createElement('span');
+      nick.textContent = DAY_NICKS[day];
+      h.append(nick);
+      const list = document.createElement('ol');
+      list.className = 'rows';
+      for (const r of picks) {
+        const clone = r.cloneNode(true) as HTMLElement;
+        clone.removeAttribute('data-event');
+        clone.hidden = false;
+        clone.dataset.denClone = '';
+        list.append(clone);
+      }
+      denList.append(h, list);
     }
     den.hidden = saved.size === 0 && !filters.den;
   }

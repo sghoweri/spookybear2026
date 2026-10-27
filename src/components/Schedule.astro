@@ -104,7 +104,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
         <h2 id="den-title" class="den-title"><span class="icon"><Paw /></span> My favs</h2>
         <p class="den-sub">Saved on this device only. Nothing leaves your browser.</p>
       </div>
-      <ol class="rows" data-den-list></ol>
+      <div data-den-list></div>
       <p class="den-empty" data-den-empty>Nothing saved yet. Tap the paw on anything that looks fun and it’ll show up here.</p>
     </section>
 
@@ -437,6 +437,21 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   }
   .den-empty {
     padding: 8px 0 10px;
+  }
+  .den-day {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--cream);
+    margin: 10px 0 6px 4px;
+  }
+  .den-day span {
+    color: var(--pink);
+    font-weight: 500;
+    margin-left: 8px;
+  }
+  [data-den-list] .rows {
+    margin-bottom: 4px;
   }
   .den:has([data-den-list] > *) .den-empty {
     display: none;
