@@ -81,6 +81,10 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
           <span>My favs</span>
           <span class="count" data-den-count>0</span>
         </button>
+        <button class="group-toggle" type="button" data-group-toggle aria-pressed="false" title="Group the list by venue">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l6-2v18M10 21h10V9l-10-4" /><path d="M14 12h2M14 16h2" /></svg>
+          <span>By venue</span>
+        </button>
         <FilterMenu id="venue" label="Location" groups={[{ label: 'Area', options: areaOptions }, { label: 'Venue', options: venueOptions }]} />
         <FilterMenu id="type" label="Type" groups={[{ options: typeOptions }]} />
         <FilterMenu id="price" label="Price" groups={[{ options: priceOptions }]} />
@@ -141,6 +145,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
                 return <EventRow event={e} venue={venue} />;
               })}
             </ol>
+            <div class="venue-groups" data-venue-groups hidden></div>
             <GridDay dayId={d.id} events={d.events} venueById={venueById} />
             <p class="day-empty" data-day-empty hidden>
               Nothing matches these filters on {d.label}.
@@ -310,6 +315,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
     color: var(--pink);
   }
   .den-toggle,
+  .group-toggle,
   .clear {
     flex: none;
     display: inline-flex;
@@ -350,6 +356,11 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   .den-toggle[aria-pressed='true'] .count {
     background: rgba(0, 0, 0, 0.25);
     color: #fff;
+  }
+  .group-toggle[aria-pressed='true'] {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #2a0516;
   }
   .clear {
     color: var(--muted);

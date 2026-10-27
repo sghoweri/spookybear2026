@@ -84,6 +84,22 @@ test.describe('schedule', () => {
   });
 });
 
+test.describe('group by venue', () => {
+  test('By venue regroups the list under venue headers', async ({ page }) => {
+    await page.goto('/?day=fri');
+    await page.getByRole('button', { name: 'By venue' }).click();
+    await expect(page).toHaveURL(/group=venue/);
+    const first = page.locator('[data-day-group="fri"] [data-venue-group]:visible').first();
+    await expect(first.locator('.venue-head')).toContainText(/Crown & Anchor/);
+    for (const row of await first.locator('[data-event]:visible').all()) await expect(row).toHaveAttribute('data-venue', 'crown-anchor');
+    await expect(page.locator('[data-day-group="fri"] [data-venue-group]:visible').nth(1).locator('.venue-head')).not.toContainText(/Crown & Anchor/);
+    // Switching back restores the single time-ordered list.
+    await page.getByRole('button', { name: 'By venue' }).click();
+    await expect(page.locator('[data-day-group="fri"] [data-venue-groups]')).toBeHidden();
+    await expect(page.locator('[data-day-group="fri"] [data-list]')).toBeVisible();
+  });
+});
+
 test.describe('grid view', () => {
   test('toggle shows the venue x time grid and syncs to the URL', async ({ page }) => {
     await page.goto('/?day=sat');

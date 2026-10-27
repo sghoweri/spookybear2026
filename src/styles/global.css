@@ -326,3 +326,38 @@ body.has-sheet {
   font-weight: 500;
   margin-left: 8px;
 }
+
+/* List grouped by venue (built in JS, so styled globally). */
+.venue-group .rows {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 4px 10px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+}
+.venue-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--cream);
+  margin: 14px 4px 6px;
+}
+.venue-head small {
+  color: var(--faint);
+  font-weight: 500;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.venue-head .venue-area {
+  color: var(--pink);
+  font-weight: 500;
+  font-size: 0.85rem;
+  margin-left: 8px;
+}
+.venue-group .row-venue {
+  display: none;
+}

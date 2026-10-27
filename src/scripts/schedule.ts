@@ -17,9 +17,11 @@ const GRID_START = 9 * 60;
 const GRID_SLOT = 15;
 const GRID_SLOTS = (26 * 60 - GRID_START) / GRID_SLOT;
 const VIEW_KEY = 'sb26:view';
+const GROUP_KEY = 'sb26:group';
 
 type Filters = {
   view: 'list' | 'grid';
+  group: 'time' | 'venue';
   day: string;
   venue: Set<string>;
   type: Set<string>;
@@ -147,14 +149,18 @@ function init(root: HTMLElement) {
     const initial = root.dataset.initialDay;
     const today = ptownDay();
     let storedView: string | null = null;
+    let storedGroup: string | null = null;
     try {
       storedView = localStorage.getItem(VIEW_KEY);
+      storedGroup = localStorage.getItem(GROUP_KEY);
     } catch {
       /* ignore */
     }
     const view = p.get('view') ?? storedView;
+    const group = p.get('group') ?? storedGroup;
     return {
       view: view === 'grid' ? 'grid' : 'list',
+      group: group === 'venue' ? 'venue' : 'time',
       day: day && (day === 'all' || availableDays.has(day)) ? day : initial && availableDays.has(initial) ? initial : today && availableDays.has(today) ? today : 'all',
       venue: list('venue'),
       type: list('type'),
@@ -239,6 +245,7 @@ function init(root: HTMLElement) {
       total += shown;
       g.hidden = !dayOn || (searching && shown === 0);
       syncGrid(g, win);
+      syncVenueGroups(g);
       const empty = g.querySelector<HTMLElement>('[data-day-empty]');
       if (empty) empty.hidden = !dayOn || shown > 0;
       const count = g.querySelector<HTMLElement>('[data-day-count]');
@@ -258,6 +265,8 @@ function init(root: HTMLElement) {
     denToggle.setAttribute('aria-pressed', String(filters.den));
     den.hidden = saved.size === 0 && !filters.den;
     viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === filters.view)));
+    groupToggle.setAttribute('aria-pressed', String(filters.group === 'venue'));
+    groupToggle.hidden = filters.view === 'grid';
     const active = Boolean(filters.venue.size || filters.type.size || filters.price.size || filters.den || win || filters.q);
     filtersBar.querySelectorAll<HTMLElement>('[data-clear]').forEach((b) => (b.hidden = !active));
     paintMenus();
@@ -276,7 +285,77 @@ function init(root: HTMLElement) {
     if (filters.den) p.set('den', '1');
     if (filters.q) p.set('q', filters.q);
     if (filters.view === 'grid') p.set('view', 'grid');
+    if (filters.group === 'venue') p.set('group', 'venue');
     history.replaceState(history.state, '', `/?${p.toString()}`);
+  }
+
+  // ---- list grouped by venue ------------------------------------------------------
+  const groupToggle = root.querySelector<HTMLButtonElement>('[data-group-toggle]')!;
+  /** Original time-ordered rows per day, so we can restore them. */
+  const originalRows = new Map<HTMLElement, HTMLElement[]>(groups.map((g) => [g, Array.from(g.querySelectorAll<HTMLElement>('[data-list] > [data-event]'))]));
+  groupToggle.addEventListener('click', () => {
+    filters.group = filters.group === 'venue' ? 'time' : 'venue';
+    try {
+      localStorage.setItem(GROUP_KEY, filters.group);
+    } catch {
+      /* ignore */
+    }
+    apply();
+    track('group', filters.group);
+  });
+
+  /** Move each day's rows into per-venue sections (or back into the time-ordered list). */
+  function syncVenueGroups(g: HTMLElement) {
+    const list = g.querySelector<HTMLElement>('[data-list]');
+    const wrap = g.querySelector<HTMLElement>('[data-venue-groups]');
+    const rowsHere = originalRows.get(g);
+    if (!list || !wrap || !rowsHere) return;
+    const byVenue = filters.group === 'venue' && filters.view === 'list';
+    if (!byVenue) {
+      if (!wrap.hidden) {
+        list.append(...rowsHere);
+        wrap.replaceChildren();
+        wrap.hidden = true;
+        list.hidden = false;
+      }
+      return;
+    }
+    if (wrap.hidden) {
+      // Build sections: venues ordered by how many events they have, then by name.
+      const counts = new Map<string, { name: string; area: string; rows: HTMLElement[] }>();
+      for (const r of rowsHere) {
+        const id = r.dataset.venue!;
+        const entry = counts.get(id) ?? { name: r.querySelector('.row-venue')?.textContent?.trim() ?? id, area: r.dataset.area ?? '', rows: [] };
+        entry.rows.push(r);
+        counts.set(id, entry);
+      }
+      const ordered = [...counts.entries()].sort((a, b) => b[1].rows.length - a[1].rows.length || a[1].name.localeCompare(b[1].name));
+      for (const [id, v] of ordered) {
+        const section = document.createElement('section');
+        section.className = 'venue-group';
+        section.dataset.venueGroup = id;
+        const h = document.createElement('h3');
+        h.className = 'venue-head';
+        h.innerHTML = `<span>${escapeHtml(v.name)}<span class="venue-area">${escapeHtml(v.area)}</span></span><small data-venue-count></small>`;
+        const ol = document.createElement('ol');
+        ol.className = 'rows';
+        ol.append(...v.rows);
+        section.append(h, ol);
+        wrap.append(section);
+      }
+      wrap.hidden = false;
+      list.hidden = true;
+    }
+    wrap.querySelectorAll<HTMLElement>('[data-venue-group]').forEach((sec) => {
+      const all = sec.querySelectorAll('[data-event]').length;
+      const shown = sec.querySelectorAll('[data-event]:not([hidden])').length;
+      sec.hidden = shown === 0;
+      const c = sec.querySelector('[data-venue-count]');
+      if (c) c.textContent = shown === all ? `${all} ${all === 1 ? 'event' : 'events'}` : `${shown} of ${all}`;
+    });
+  }
+  function escapeHtml(t: string) {
+    return t.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
   }
 
   // ---- grid view --------------------------------------------------------------
@@ -307,9 +386,19 @@ function init(root: HTMLElement) {
     const grid = g.querySelector<HTMLElement>('[data-grid]');
     if (!list || !grid) return;
     const showGrid = filters.view === 'grid';
-    list.hidden = !showGrid ? false : true;
     grid.hidden = !showGrid;
-    if (!showGrid) return;
+    if (!showGrid) {
+      if (filters.group !== 'venue') list.hidden = false;
+      return;
+    }
+    list.hidden = true;
+    const wrap = g.querySelector<HTMLElement>('[data-venue-groups]');
+    if (wrap && !wrap.hidden) {
+      // Put rows back so counts/visibility logic stays simple while the grid is shown.
+      list.append(...(originalRows.get(g) ?? []));
+      wrap.replaceChildren();
+      wrap.hidden = true;
+    }
     const hiddenBySlug = new Map<string, boolean>();
     g.querySelectorAll<HTMLElement>('[data-event]').forEach((r) => hiddenBySlug.set(r.dataset.slug!, r.hidden));
     const laneHasVisible = new Map<string, boolean>();
