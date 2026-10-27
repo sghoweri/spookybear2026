@@ -49,6 +49,6 @@ const icon = (size) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64"><rect width="64" height="64" fill="#15081f"/>${paw(32, 34, 1, -15, '#ff7a1a')}</svg>`;
 
 await mkdir('public', { recursive: true });
-await sharp(Buffer.from(og), { density: 144 }).png({ compressionLevel: 9, palette: true }).toFile('public/og.png');
+await sharp(Buffer.from(og), { density: 72 }).png({ compressionLevel: 9, palette: true }).toFile('public/og.png');
 await sharp(Buffer.from(icon(1024))).png().toFile('scripts/assets/icon-1024.png');
 console.log('og.png and icon-1024.png written');
