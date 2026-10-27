@@ -17,6 +17,8 @@ export interface Lane {
   label: string;
   sub: string;
   first: boolean;
+  /** Lane indexes this label covers: the room's first lane plus overflow lanes for overlaps. */
+  covers: number[];
 }
 export interface Block {
   event: EventEntry;
@@ -60,6 +62,7 @@ export function buildDay(events: EventEntry[], venueById: Map<string, VenueEntry
 
   const lanes: Lane[] = [];
   const blocks: Block[] = [];
+  let laneCount = 0;
   for (const [venueId, list] of venueOrder) {
     const venue = venueById.get(venueId)!;
     const venueName = venue.data.shortName ?? venue.data.name;
@@ -70,7 +73,7 @@ export function buildDay(events: EventEntry[], venueById: Map<string, VenueEntry
       const label = e.data.location ?? '';
       const key = label
         .toLowerCase()
-        .replace(/^the\s+/, '')
+        .replace(/^(the|club)\s+/, '')
         .replace(/\s+(room|bar|lounge)$/, '')
         .trim();
       const entry = rooms.get(key) ?? { label, events: [] };
@@ -82,6 +85,7 @@ export function buildDay(events: EventEntry[], venueById: Map<string, VenueEntry
       // Greedy lane packing for overlaps within a room.
       const laneEnds: number[] = [];
       const laneIndexes: number[] = [];
+      let groupLabel: Lane | null = null;
       for (const e of roomEvents) {
         const startMin = mins(e.data.start!);
         let endMin = e.data.end ? mins(e.data.end) : startMin + DEFAULT_LEN;
@@ -90,15 +94,14 @@ export function buildDay(events: EventEntry[], venueById: Map<string, VenueEntry
         if (k === -1) {
           k = laneEnds.length;
           laneEnds.push(0);
-          lanes.push({
-            index: lanes.length,
-            venueId,
-            label: firstLaneOfVenue ? venueName : room || 'also',
-            sub: firstLaneOfVenue ? room : '',
-            first: firstLaneOfVenue,
-          });
-          laneIndexes.push(lanes.length - 1);
-          firstLaneOfVenue = false;
+          const index = laneCount++;
+          if (!groupLabel) {
+            // One label per room; overflow lanes for overlapping events extend its span.
+            groupLabel = { index, venueId, label: firstLaneOfVenue ? venueName : room, sub: firstLaneOfVenue ? room : '', first: firstLaneOfVenue, covers: [index] };
+            lanes.push(groupLabel);
+            firstLaneOfVenue = false;
+          } else groupLabel.covers.push(index);
+          laneIndexes.push(index);
         }
         laneEnds[k] = endMin;
         const startSlot = slotOf(startMin);
@@ -107,7 +110,7 @@ export function buildDay(events: EventEntry[], venueById: Map<string, VenueEntry
       }
     }
   }
-  return { lanes, blocks, tba };
+  return { lanes, blocks, tba, laneCount };
 }
 
 /** Hour labels for the header row: 9am, 10am, ... 1am. */

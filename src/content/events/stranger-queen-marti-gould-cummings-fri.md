@@ -1,7 +1,7 @@
 ---
 title: 'Stranger Queen: Marti Gould Cummings'
 venue: gifford-house
-location: Club Purgatory
+location: Purgatory
 date: '2026-10-30'
 start: '18:30'
 end: null

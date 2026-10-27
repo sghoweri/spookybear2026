@@ -1,7 +1,7 @@
 ---
 title: All Hallows Tea (Gifford House x Baby Tea)
 venue: gifford-house
-location: yard
+location: The Yard
 date: '2026-10-30'
 start: '14:00'
 end: '18:00'

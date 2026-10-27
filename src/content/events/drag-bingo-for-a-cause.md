@@ -1,7 +1,7 @@
 ---
 title: Drag Bingo for a Cause
 venue: crown-anchor
-location: Paramount Room
+location: Paramount
 date: '2026-10-31'
 start: '14:00'
 end: '16:30'

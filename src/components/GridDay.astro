@@ -15,13 +15,13 @@ interface Props {
   venueById: Map<string, VenueEntry>;
 }
 const { dayId, events, venueById } = Astro.props;
-const { lanes, blocks, tba } = buildDay(events, venueById);
+const { lanes, blocks, tba, laneCount } = buildDay(events, venueById);
 const hours = hourMarks();
 ---
 
 <div class="grid-view" data-grid={dayId} hidden>
   <div class="grid-scroll" tabindex="0" aria-label="Schedule grid, scroll sideways for later in the day">
-    <div class="grid" style={`--slots: ${SLOTS}; --lanes: ${lanes.length};`} data-grid-table>
+    <div class="grid" style={`--slots: ${SLOTS}; --lanes: ${laneCount};`} data-grid-table>
       <div class="corner" aria-hidden="true"></div>
       {
         hours.map((h) => (
@@ -34,7 +34,7 @@ const hours = hourMarks();
       <div class="now" data-grid-now hidden aria-hidden="true"><span>now</span></div>
       {
         lanes.map((l) => (
-          <div class:list={['lane', { 'lane-first': l.first }]} style={`grid-row: ${l.index + 2};`} data-grid-lane={l.index} data-venue={l.venueId}>
+          <div class:list={['lane', { 'lane-first': l.first }]} style={`grid-row: ${l.index + 2} / span ${l.covers.length};`} data-grid-lane={l.index} data-covers={l.covers.join(',')} data-venue={l.venueId}>
             <span class="lane-name">{l.label}</span>
             {l.sub && <span class="lane-sub">{l.sub}</span>}
           </div>

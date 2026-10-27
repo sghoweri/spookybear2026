@@ -1,7 +1,7 @@
 ---
 title: 4th Annual Townie Masquerade Ball
 venue: gifford-house
-location: Club Purgatory
+location: Purgatory
 date: '2026-10-29'
 start: '22:00'
 end: '01:00'

@@ -407,18 +407,20 @@ function init(root: HTMLElement) {
       b.hidden = hidden;
       if (!hidden) laneHasVisible.set(b.dataset.lane!, true);
     });
-    // Renumber visible lanes so the grid has no gaps.
+    // Renumber visible lanes so the grid has no gaps; a label spans whichever of its lanes remain.
     const laneRow = new Map<string, number>();
     let n = 0;
     grid.querySelectorAll<HTMLElement>('[data-grid-lane]').forEach((l) => {
-      const id = l.dataset.gridLane!;
-      const on = laneHasVisible.get(id) === true;
-      l.hidden = !on;
-      if (on) {
+      const covers = (l.dataset.covers ?? l.dataset.gridLane!).split(',');
+      const live = covers.filter((id) => laneHasVisible.get(id) === true);
+      l.hidden = live.length === 0;
+      if (!live.length) return;
+      const firstRow = n + 2;
+      for (const id of live) {
         n++;
         laneRow.set(id, n + 1);
-        l.style.gridRow = String(n + 1);
       }
+      l.style.gridRow = `${firstRow} / span ${live.length}`;
     });
     grid.querySelectorAll<HTMLElement>('[data-grid-event]').forEach((b) => {
       const row = laneRow.get(b.dataset.lane!);
