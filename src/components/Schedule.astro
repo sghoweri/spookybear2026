@@ -65,7 +65,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
         </button>
         <button class="den-toggle" type="button" data-den-toggle aria-pressed="false" aria-controls="den">
           <span class="icon"><Paw /></span>
-          <span>My den</span>
+          <span>My favs</span>
           <span class="count" data-den-count>0</span>
         </button>
         <FilterMenu id="venue" label="Location" groups={[{ label: 'Area', options: areaOptions }, { label: 'Venue', options: venueOptions }]} />
@@ -101,7 +101,7 @@ const initialDay = openEvent ? dayIdFor(openEvent.data.date) : undefined;
   <div class="wrap">
     <section class="den" id="den" data-den hidden aria-labelledby="den-title">
       <div class="den-head">
-        <h2 id="den-title" class="den-title"><span class="icon"><Paw /></span> My den</h2>
+        <h2 id="den-title" class="den-title"><span class="icon"><Paw /></span> My favs</h2>
         <p class="den-sub">Saved on this device only. Nothing leaves your browser.</p>
       </div>
       <ol class="rows" data-den-list></ol>

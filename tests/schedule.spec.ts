@@ -119,8 +119,8 @@ test.describe('event dialog', () => {
   });
 });
 
-test.describe('my den (favourites)', () => {
-  test('saving an event persists across reloads and shows in the den', async ({ page }) => {
+test.describe('my favs (favourites)', () => {
+  test('saving an event persists across reloads and shows in the favs list', async ({ page }) => {
     await page.goto('/?day=thu');
     const paw = page.locator('[data-event][data-slug="early-bear-meet-up"] [data-paw]');
     await paw.click();

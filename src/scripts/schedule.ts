@@ -1,5 +1,5 @@
 /* Client behaviour for the schedule: day tabs, multi-select filters, time window,
-   fuzzy search, favourites ("my den"), the event dialog with shareable URLs, and
+   fuzzy search, favourites ("my favs"), the event dialog with shareable URLs, and
    the "Now" badge. Vanilla TypeScript; fuse.js is loaded only when search opens. */
 
 const TZ = 'America/New_York';
@@ -81,8 +81,8 @@ function init(root: HTMLElement) {
       document.querySelectorAll<HTMLElement>(`[data-paw="${s}"]`).forEach((b) => {
         b.setAttribute('aria-pressed', String(on));
         const label = b.querySelector('[data-paw-label]');
-        if (label) label.textContent = on ? 'In my den' : 'Save to my den';
-        else b.setAttribute('aria-label', `${on ? 'Remove' : 'Save'} ${titleFor(s)} ${on ? 'from' : 'to'} your den`);
+        if (label) label.textContent = on ? 'In my favs' : 'Save to my favs';
+        else b.setAttribute('aria-label', `${on ? 'Remove' : 'Save'} ${titleFor(s)} ${on ? 'from' : 'to'} your favs`);
       });
       document.querySelectorAll<HTMLElement>(`[data-event][data-slug="${s}"]`).forEach((r) => r.classList.toggle('is-saved', on));
       document.querySelectorAll<HTMLElement>(`[data-detail-slug="${s}"] [data-saved-badge]`).forEach((b) => (b.hidden = !on));

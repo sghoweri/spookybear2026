@@ -47,7 +47,7 @@ const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) :
         <img src={placeholder.src} alt="" width="800" height="450" loading="lazy" decoding="async" class="detail-img detail-img-placeholder" />
       )
     }
-    <span class="badge badge-saved detail-saved" data-saved-badge hidden><span class="icon"><Paw /></span> In your den</span>
+    <span class="badge badge-saved detail-saved" data-saved-badge hidden><span class="icon"><Paw /></span> In your favs</span>
   </div>
 
   <div class="detail-body">
@@ -79,7 +79,7 @@ const verified = data.lastVerified ? new Date(`${data.lastVerified}T12:00:00`) :
       }
       <button class="btn btn-secondary" type="button" data-paw={event.id} aria-pressed="false">
         <span class="icon"><Paw /></span>
-        <span data-paw-label>Save to my den</span>
+        <span data-paw-label>Save to my favs</span>
       </button>
       <button class="btn btn-ghost" type="button" data-share={shareUrl} data-share-title={data.title}>
         <span data-share-label>Share</span>
