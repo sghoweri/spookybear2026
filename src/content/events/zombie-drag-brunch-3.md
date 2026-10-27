@@ -1,10 +1,10 @@
 ---
-title: Zombie Drag Brunch 3
+title: Zombie Drag Brunch 3 (11am seating)
 venue: provincetown-inn
 location: Mayflower Room
 date: '2026-10-31'
 start: '11:00'
-end: '14:00'
+end: '12:00'
 type: brunch
 price: null
 isFree: false
@@ -23,7 +23,7 @@ sources:
   - 'https://ptownie.com/events/zombie-drag-brunch-3-provincetown/'
   - 'https://www.provincetowninn.com/entertainment'
 confidence: high
-locked: false
+locked: true
 lastVerified: '2026-10-26'
 ---
 
