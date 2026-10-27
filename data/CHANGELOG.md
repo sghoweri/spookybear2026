@@ -10,6 +10,7 @@ Overnight source sweep: 8 of 18 sources changed, almost all cosmetic (timestamps
 
 - `a-house-{thu..sun}`: **A-House Halloween Weekend**, Thu Oct 29 to Sun Nov 1, doors 10pm, costume contest and prizes. From the poster on ahouse.com/#events (spotted after the placeholders went up). Wednesday stays a placeholder.
 - `a-house-wed` and `shipwreck-lounge-{wed..sun}`: standing "open nightly" placeholder entries so the two bars show up in the list, grid and venue filter even without posted Spooky Bear events. Flagged `placeholder: true` (new schema field): styled as a hint, kept out of the calendar feed, the hero count and structured data. Requested via site feedback (GitHub issue #2).
+- `come-and-scrum-all-that-jazz`: Boston Ironsides RFC fundraiser, Sat Oct 31, 12:30–3:30pm, Harbor Lounge, 1920s jazz theme. From the club's flyer (shared by Salem); not yet on the club site or any Ptown calendar, so price is left open.
 - `queer-figure-drawing-bill-and-hogan`: Fri Oct 30, 2:00–3:30pm, Eric Lesh Gallery (new venue, 237 Commercial St). From the Provincetown Business Guild Halloween calendar.
 - `book-signing-glam-reapers-guide-to-slaying`: Fri Oct 30, 6:30–8:00pm, Eric Lesh Gallery, free. Same source.
 
