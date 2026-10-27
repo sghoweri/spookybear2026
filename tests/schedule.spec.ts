@@ -220,16 +220,16 @@ test.describe('other pages', () => {
 
   test('bar placeholders show as hints and stay out of the calendar', async ({ page, request }) => {
     await page.goto('/?day=sat');
-    const row = page.locator('[data-event][data-placeholder][data-venue="a-house"]:visible');
+    const row = page.locator('[data-event][data-placeholder][data-venue="shipwreck-lounge"]:visible');
     await expect(row).toHaveCount(1);
     await expect(row.getByText('Bar hours')).toBeVisible();
     await row.locator('[data-open]').click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByText(/Nothing Spooky Bear-specific has been posted/)).toBeVisible();
-    await expect(page).toHaveURL(/\/event\/a-house-sat$/);
+    await expect(page).toHaveURL(/\/event\/shipwreck-lounge-sat$/);
     const ics = await (await request.get('/events.ics')).text();
-    expect(ics).not.toContain('a-house-sat@');
+    expect(ics).not.toContain('shipwreck-lounge-sat@');
     const json = await (await request.get('/events.json')).json();
     const ph = json.events.find((e: { id: string }) => e.id === 'shipwreck-lounge-fri');
     expect(ph?.placeholder).toBe(true);

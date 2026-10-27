@@ -8,7 +8,8 @@ Overnight source sweep: 8 of 18 sources changed, almost all cosmetic (timestamps
 
 **Added**
 
-- `a-house-{wed..sun}` and `shipwreck-lounge-{wed..sun}`: standing "open nightly" placeholder entries so the two bars show up in the list, grid and venue filter even though neither has posted Spooky Bear events. Flagged `placeholder: true` (new schema field): styled as a hint, kept out of the calendar feed, the hero count and structured data. Requested via site feedback (GitHub issue #2).
+- `a-house-{thu..sun}`: **A-House Halloween Weekend**, Thu Oct 29 to Sun Nov 1, doors 10pm, costume contest and prizes. From the poster on ahouse.com/#events (spotted after the placeholders went up). Wednesday stays a placeholder.
+- `a-house-wed` and `shipwreck-lounge-{wed..sun}`: standing "open nightly" placeholder entries so the two bars show up in the list, grid and venue filter even without posted Spooky Bear events. Flagged `placeholder: true` (new schema field): styled as a hint, kept out of the calendar feed, the hero count and structured data. Requested via site feedback (GitHub issue #2).
 - `queer-figure-drawing-bill-and-hogan`: Fri Oct 30, 2:00–3:30pm, Eric Lesh Gallery (new venue, 237 Commercial St). From the Provincetown Business Guild Halloween calendar.
 - `book-signing-glam-reapers-guide-to-slaying`: Fri Oct 30, 6:30–8:00pm, Eric Lesh Gallery, free. Same source.
 

@@ -1,32 +1,33 @@
 ---
-title: 'A-House: open nightly'
+title: 'A-House Halloween Weekend: Friday'
 venue: a-house
-location: null
+location: The Big Room
 date: '2026-10-30'
-start: '21:00'
+start: '22:00'
 end: '01:00'
-type: other
-price: Cover varies by night
+type: party
+price: null
 isFree: null
 ticketUrl: null
-infoUrl: 'https://ahouse.com/'
-image: null
-imageSource: null
+infoUrl: 'https://ahouse.com/#events'
+image: ./images/a-house-halloween-weekend.jpg
+imageSource: 'https://ahouse.com/events/ec135f55-014d-4629-9393-d14958d61228-20261002194343332.jpg'
 organizer: Atlantic House
 ageRestriction: 21+
-dressCode: null
-tags: []
+dressCode: Costumes encouraged
+tags:
+  - Costume contest
 featured: false
-placeholder: true
 sources:
-  - 'https://ahouse.com/'
+  - 'https://ahouse.com/#events'
+  - 'https://ahouse.com/events/ec135f55-014d-4629-9393-d14958d61228-20261002194343332.jpg'
 confidence: medium
 locked: true
 lastVerified: '2026-10-27'
 ---
 
-The A-House hasn’t posted anything Spooky Bear-specific yet, and honestly it doesn’t need to: the Little Bar, the Macho Bar and the Big Room dance floor are open nightly, year-round, and this is one of the busiest rooms in town on a bear weekend. Expect the dance floor to fill up late.
+The A-House runs its Halloween Weekend all four nights, Thursday through Sunday: doors open at 10pm and there’s a costume contest with prizes. The Big Room dance club runs 10pm to 1am; earlier in the day the Little Bar opens at noon and the Macho Bar at 6pm, both until 1am.
 
-We’ll add any announced parties or DJ nights here the moment they surface. Spotted one? Use the feedback link below.
+The poster doesn’t list DJs, cover or which night the contest is judged, so check the door or the A-House’s socials for the night-by-night details.
 
-<!-- research notes: Placeholder requested via site feedback (issue #2). ahouse.com lists no event calendar; hours are not published, so the 9pm–1am window is the dance club's usual evening rather than a posted schedule. -->
+<!-- research notes: From the A-House Halloween Weekend poster on ahouse.com/#events (flagged by site feedback Oct 27). Poster text: Thursday • Friday • Saturday • Sunday, Costume Contest & Prizes, Doors open 10pm. No price or DJ info given; room hours from the schedule embedded in ahouse.com. Replaced the earlier bar-hours placeholder; slug kept so shared links still work. -->
