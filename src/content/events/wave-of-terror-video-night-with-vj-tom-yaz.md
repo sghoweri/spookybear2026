@@ -1,7 +1,7 @@
 ---
 title: 'Wave of Terror: Video Night with VJ Tom Yaz'
 venue: crown-anchor
-location: The Wave Bar
+location: Wave Bar
 date: '2026-10-29'
 start: '20:00'
 end: '01:00'

@@ -1,7 +1,7 @@
 ---
 title: Ursamen Meet & Greet
 venue: crown-anchor
-location: The Wave Bar
+location: Wave Bar
 date: '2026-10-30'
 start: '17:00'
 end: '20:00'

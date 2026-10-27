@@ -1,7 +1,7 @@
 ---
 title: Country Line Dancing
 venue: gifford-house
-location: null
+location: Wilde Playhouse
 date: '2026-10-28'
 start: '19:00'
 end: '21:00'
@@ -21,7 +21,7 @@ sources:
   - 'https://ptownie.com/provincetown-calendar/'
   - 'https://ptownie.com/events/country-line-dancing-provincetown-2/'
 confidence: medium
-locked: false
+locked: true
 lastVerified: '2026-10-26'
 ---
 
