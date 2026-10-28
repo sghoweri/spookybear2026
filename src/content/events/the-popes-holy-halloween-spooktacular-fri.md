@@ -30,9 +30,9 @@ sources:
   - 'https://ptownie.com/provincetown-calendar/'
 confidence: high
 locked: false
-lastVerified: '2026-10-26'
+lastVerified: '2026-10-28'
 ---
 
-Full-length theatrical drag extravaganza starring Discord Addams as the Pope and Kat Sass as Sister Mary Katherine Louise Sassington, with live music, a dream ballet, confessions, communion and a costume contest. Two nights of 'unholy revelry'; all sales final.
+Full-length theatrical drag extravaganza starring Discord Addams as the Pope and Kat Sass as Sister Mary Katherine Louise Sassington, with live music, a dream ballet, confessions, communion and a costume contest. Billed early on as two nights, but as of Oct 28 Pilgrim House lists Friday only on its calendar and ticket page, so treat this as the one night. All sales final.
 
-<!-- research notes: Provincetown Magazine and ptownie list both Oct 30 and Oct 31 at 9 PM; the Pilgrim House ticket page showed only Oct 30. Not an Ursamen event (ptownie tags it 'as part of Spooky Bear'). -->
+<!-- research notes: Provincetown Magazine (Oct 21) said both Oct 30 and Oct 31. On Oct 28 the venue calendar dropped the Oct 31 showroom slot, the product page's date dropdown offers only Fri Oct 30 (in stock), and ptownie lists Oct 30 only, so the Saturday entry was removed. Not an Ursamen event (ptownie tags it 'as part of Spooky Bear'). -->
